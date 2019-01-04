@@ -18,29 +18,23 @@ class Menu():
         punkt = 0
         while done:
             screen.fill((0, 100, 200))
-
-            mp = pygame.mouse.get_pos()
-            for i in self.punkts:
-                if mp[0] > i[0] and mp[0] < i[0] + 155 and mp[1] > i[1] and mp[1] < i[1] + 50:
-                    punkt = i[5]
-
-                for j in pygame.event.get():
-                    if j.type == pygame.QUIT:
+            for j in pygame.event.get():
+                if j.type == pygame.QUIT:
+                    sys.exit()
+                if j.type == pygame.KEYDOWN:
+                    if j.key == pygame.K_ESCAPE:
                         sys.exit()
-                    if j.type == pygame.KEYDOWN:
-                        if j.key == pygame.K_ESCAPE:
-                            sys.exit()
-                        if j.key == pygame.K_UP:
-                            if punkt > 0:
-                                punkt -= 1
-                            if j.key == pygame.K_DOWN:
-                                if punkt < len(self.punkts) - 1:
-                                    punkt += 1
-                    if j.type == pygame.MOUSEBUTTONDOWN and j.button == 1:
-                        if punkt == 0:
-                            done = False
-                        elif punkt == 1:
-                            sys.exit()
+                    if j.key == pygame.K_UP:
+                        if punkt > 0:
+                            punkt -= 1
+                        if j.key == pygame.K_DOWN:
+                            if punkt < len(self.punkts) - 1:
+                                punkt += 1
+                if j.type == pygame.MOUSEBUTTONDOWN and j.button == 1:
+                    if punkt == 0:
+                        done = False
+                    elif punkt == 1:
+                        sys.exit()
 
 
 def load_image(name, colorkey=None):
@@ -63,7 +57,7 @@ image1 = pygame.transform.scale(image, (200, 100))
 image2 = pygame.transform.scale(image, (100, 200))
 screen.blit(image, (10, 10))
 game = Menu(punkts)
-game.menu()
 while pygame.event.wait().type != pygame.QUIT:
     pygame.display.flip()
+    game.menu()
 pygame.quit()
