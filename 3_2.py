@@ -7,14 +7,15 @@ color = (51, 51, 51)
 font_color = (255, 255, 153)
 high_color = (153, 102, 255)
 font = pygame.font.SysFont('arial', 72)
-surface_width = 800
-surface_height = 600
+surface_width = 500
+surface_height = 500
 
 surface_menu = pygame.display.set_mode([surface_width, surface_height])
 
 pygame.display.set_caption("Test")
 
 surface_menu.fill(color)
+
 
 class Text():
     def __init__(self, text, font, surface_menu, x, y):
@@ -25,9 +26,18 @@ class Text():
         surface_menu.blit(self.text_obj, self.text_rect)
 
     def get_click(self, mouse_position):
-        x,y = mouse_position
-        if self.text_rect.topleft[0]  < x <= self.text_rect.topleft [0]+ self.text_rect.w and self.text_rect.topleft[1]  < y <= self.text_rect.topleft [1]+ self.text_rect.h:
-            print("Click in", self.name )
+        x, y = mouse_position
+        if self.text_rect.topleft[0] < x <= self.text_rect.topleft[0] + self.text_rect.w and self.text_rect.topleft[
+            1] < y <= self.text_rect.topleft[1] + self.text_rect.h:
+            print("Click in", self.name)
+            print(y, self.text_rect.topleft[1], self.text_rect.h,
+                  surface_height)  # Смотреть на разницу на экране(строки10,11,41,42,30)
+            print(x, self.text_rect.topleft[0], self.text_rect.w, surface_width)
+            if (self.text_rect.topleft[0] - self.text_rect.topleft[1]) % 5 == 0:
+                print('Все ок!')
+            elif (self.text_rect.topleft[0] - self.text_rect.topleft[1]) % 5 == 0:
+                print('exit')
+
 
 position_text = [((surface_width / 2) - 65, (surface_height / 2) - 90),
                  ((surface_width / 2) - 50, (surface_height / 2) + 10)]
