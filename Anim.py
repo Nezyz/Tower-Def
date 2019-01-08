@@ -74,7 +74,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 def main():
-    images = load_images('Tower-Def\images1')
+    images = load_images('images1')
     player = AnimatedSprite(position=(100, 100), images=images)
     all_sprites = pygame.sprite.Group(player)
 

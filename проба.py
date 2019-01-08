@@ -1,6 +1,6 @@
 import pygame
 import sys
-import  os
+import os
 FPS = 50
 pygame.init()
 size = width, height = (500, 500)
