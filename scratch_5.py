@@ -2,10 +2,10 @@ import pygame
 
 pygame.init()
 
-WHITE = (255, 255, 255)
-ACTIVE_COLOR = pygame.Color('dodgerblue1')
-INACTIVE_COLOR = pygame.Color('dodgerblue4')
-FONT = pygame.font.SysFont('arial', 50)
+white = (255, 255, 255)
+active_color = pygame.Color('dodgerblue1')
+inactive_color = pygame.Color('dodgerblue4')
+font = pygame.font.SysFont('arial', 50)
 
 
 def draw_button(button, screen):
@@ -14,14 +14,14 @@ def draw_button(button, screen):
 
 
 def create_button(x, y, w, h, text, callback):
-    text_surf = FONT.render(text, True, WHITE)
+    text_surf = font.render(text, True, white)
     button_rect = pygame.Rect(x, y, w, h)
     text_rect = text_surf.get_rect(center=button_rect.center)
     button = {
         'rect': button_rect,
         'text': text_surf,
         'text rect': text_rect,
-        'color': INACTIVE_COLOR,
+        'color': inactive_color,
         'callback': callback,
     }
     return button
@@ -65,11 +65,11 @@ def main():
             elif event.type == pygame.MOUSEMOTION:
                 for button in button_list:
                     if button['rect'].collidepoint(event.pos):
-                        button['color'] = ACTIVE_COLOR
+                        button['color'] = active_color
                     else:
-                        button['color'] = INACTIVE_COLOR
+                        button['color'] = inactive_color
 
-        screen.fill(WHITE)
+        screen.fill(white)
         for button in button_list:
             draw_button(button, screen)
         pygame.display.update()
