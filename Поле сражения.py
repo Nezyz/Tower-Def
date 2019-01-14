@@ -47,6 +47,11 @@ class AI(pygame.sprite.Sprite):
 
         size = (32, 32)
 
+        self.health = 100
+        self.damage = 10
+
+
+
         self.rect = pygame.Rect((width-50, random.randint(0,height - 32)), size)
         self.images = images
         self.images_right = images
