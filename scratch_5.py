@@ -5,7 +5,7 @@ pygame.init()
 WHITE = (255, 255, 255)
 ACTIVE_COLOR = pygame.Color('dodgerblue1')
 INACTIVE_COLOR = pygame.Color('dodgerblue4')
-FONT = pygame.font.Font(None, 50)
+FONT = pygame.font.SysFont('arial', 50)
 
 
 def draw_button(button, screen):

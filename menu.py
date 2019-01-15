@@ -33,7 +33,8 @@ class Text():
             print(y, self.text_rect.topleft[1], self.text_rect.h,
                   surface_height)  # Смотреть на разницу на экране(строки10,11,41,42,30)
             print(x, self.text_rect.topleft[0], self.text_rect.w, surface_width)
-            if (self.text_rect.topleft[0] - self.text_rect.topleft[1]) % 5 == 0:
+            if (self.text_rect.topleft[0] - self.text_rect.topleft[
+                1]) % 5 == 0:  # Тут расчет как активировать одну из кнопак и действие при их нажатии
                 print('Все ок!')
             elif (self.text_rect.topleft[0] - self.text_rect.topleft[1]) % 5 == 0:
                 print('exit')
