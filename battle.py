@@ -2,14 +2,12 @@ import pygame
 import os
 import random
 
-size = width, height = 300,300
+size = width, height = 5200, 11
 
 screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
-
-
 
 
 def load_images(path, colorkey=None):
@@ -20,9 +18,11 @@ def load_images(path, colorkey=None):
             if colorkey is -1:
                 colorkey = image.get_at((0, 0))
             image.set_colorkey(colorkey)
+            image = image.convert_alpha()
         images.append(image)
-        image = image.convert_alpha()
     return images
+
+
 def create_battleground():
     global width, height
     background = pygame.image.load('field_battle.jpg')
@@ -34,12 +34,17 @@ def create_battleground():
     width, height = background_size
     screen.blit(background, (0, 0))
 
+
 class Tower(pygame.sprite.Sprite):
+    tower_def = load_images('tower_def', -1)
+
     def __init__(self):
         super().__init__(all_sprites)
-        pass
-    def draw(self):
-        pass
+        self.image = Tower.tower_def[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (10, 10)
+        self.index = 0
+
 
 class AI(pygame.sprite.Sprite):
     def __init__(self, images):
@@ -50,9 +55,7 @@ class AI(pygame.sprite.Sprite):
         self.health = 100
         self.damage = 10
 
-
-
-        self.rect = pygame.Rect((width-50, random.randint(0,height - 32)), size)
+        self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
         self.images = images
         self.images_right = images
         self.images_left = [pygame.transform.flip(image, True, False) for image in images]
@@ -97,9 +100,10 @@ class AI(pygame.sprite.Sprite):
             self.image = self.images[self.index]
 
         self.rect.move_ip(*self.velocity)
+
     def run_ai(self):
         self.vx = -3
-        if  self.rect.left < 125:
+        if self.rect.left < 125:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -109,27 +113,26 @@ class AI(pygame.sprite.Sprite):
 
 
 create_battleground()
-tower = Tower()
 running = True
 count_ai = 3
 dt = clock.tick(50) / 1100
-ai=[]
+ai = []
 images_ai = load_images('images1', -1)
 for i in range(count_ai):
     ai.append(AI(images=images_ai))
 all_sprites = pygame.sprite.Group(ai)
+tower = Tower()
 while running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-
     create_battleground()
     all_sprites.draw(screen)
     all_sprites.update(dt)
     pygame.display.flip()
-    pygame.display.update()
+    # pygame.display.update()
     clock.tick(25)
 print(ai)
 for player in ai:
