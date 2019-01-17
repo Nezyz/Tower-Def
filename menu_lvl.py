@@ -12,7 +12,6 @@ fontObj = []
 textRectObj = []
 textSurfaceObj = []
 name = []
-# Тут скорее всего цикл for для уменьшиния и упрощения кода
 current = 0
 for i in range(4):
     for j in range(5):

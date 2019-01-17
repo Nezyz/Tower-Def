@@ -2,7 +2,7 @@ import pygame
 import os
 import random
 
-size = width, height = 300, 300
+size = width, height = 300,300
 
 screen = pygame.display.set_mode(size)
 
@@ -16,12 +16,12 @@ def load_images(path, colorkey=None):
     images = []
     for file_name in os.listdir(path):
         image = pygame.image.load(path + os.sep + file_name).convert()
-        image = image.convert_alpha()
         if colorkey is not None:
             if colorkey is -1:
                 colorkey = image.get_at((0, 0))
             image.set_colorkey(colorkey)
         images.append(image)
+        image = image.convert_alpha()
     return images
 def create_battleground():
     global width, height
@@ -98,8 +98,8 @@ class AI(pygame.sprite.Sprite):
 
         self.rect.move_ip(*self.velocity)
     def run_ai(self):
-        self.vx = -5
-        if  self.rect.left < 100:
+        self.vx = -3
+        if  self.rect.left < 125:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -130,7 +130,7 @@ while running:
     all_sprites.update(dt)
     pygame.display.flip()
     pygame.display.update()
-    clock.tick(50)
+    clock.tick(25)
 print(ai)
 for player in ai:
     print(player.get_pos())
