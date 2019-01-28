@@ -8,7 +8,7 @@ screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
-
+fire = None
 
 def load_images(path, colorkey=None):
     images = []
@@ -40,13 +40,22 @@ class Tower(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
-        self.image = Tower.tower_def[0]
+        self.image = Tower.tower_def[1]
         self.rect = self.image.get_rect()
         self.rect.topleft = (10, 10)
         self.index = 0
 
+class Fire(pygame.sprite.Sprite):
+    arrow = load_images('tower_def', -1)
 
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = Fire.arrow[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (300, 350)
+        self.index = 1
 class AI(pygame.sprite.Sprite):
+    fire = None
     def __init__(self, images):
         super(AI, self).__init__()
 
@@ -103,7 +112,7 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -3
-        if self.rect.left < 125:
+        if self.rect.left < 105:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -111,6 +120,11 @@ class AI(pygame.sprite.Sprite):
         self.update_time_dependent(dt)
         self.run_ai()
 
+    def shot(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    fire = Fire()
 
 create_battleground()
 running = True
@@ -122,6 +136,7 @@ for i in range(count_ai):
     ai.append(AI(images=images_ai))
 all_sprites = pygame.sprite.Group(ai)
 tower = Tower()
+#fire = Fire()
 while running:
 
     for event in pygame.event.get():
@@ -132,7 +147,6 @@ while running:
     all_sprites.draw(screen)
     all_sprites.update(dt)
     pygame.display.flip()
-    # pygame.display.update()
     clock.tick(25)
 print(ai)
 for player in ai:
