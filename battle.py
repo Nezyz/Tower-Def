@@ -52,8 +52,27 @@ class Fire(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = Fire.arrow[0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (300, 350)
-        self.index = 1
+        self.rect.topleft = (40, 65)
+        self.index = 0
+class Bashya(pygame.sprite.Sprite):
+    town = load_images('tower_def', -1)
+
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = Bashya.town[2]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 170)
+        self.index = 0
+class Tower_2(pygame.sprite.Sprite):
+    tower_def_1 = load_images('tower_def', -1)
+
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = Tower_2.tower_def_1[1]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (10, 350)
+        self.index = 0
+
 class AI(pygame.sprite.Sprite):
     fire = None
     def __init__(self, images):
@@ -112,20 +131,13 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -3
-        if self.rect.left < 105:
+        if self.rect.left < 235:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
     def update(self, dt):
         self.update_time_dependent(dt)
         self.run_ai()
-
-    def shot(self):
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    fire = Fire()
-
 create_battleground()
 running = True
 count_ai = 3
@@ -136,11 +148,16 @@ for i in range(count_ai):
     ai.append(AI(images=images_ai))
 all_sprites = pygame.sprite.Group(ai)
 tower = Tower()
-#fire = Fire()
+tower2 = Tower_2()
+town = Bashya()
 while running:
 
     for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                fire = Fire()
         if event.type == pygame.QUIT:
+
             running = False
 
     create_battleground()
