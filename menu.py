@@ -1,5 +1,5 @@
 import pygame
-
+import menu_lvl
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -34,8 +34,7 @@ def main():
 
     def start():
         pass
-
-    def exitt():
+    def exit():
         nonlocal done
         done = True
 
@@ -49,7 +48,7 @@ def main():
     button1 = create_button(100, 100, 250, 80, 'Start', start)
     button2 = create_button(100, 200, 250, 80, 'Settings', settings)
     button3 = create_button(100, 300, 250, 80, 'Info', info)
-    button4 = create_button(100, 400, 250, 80, 'Exit', exitt)
+    button4 = create_button(100, 400, 250, 80, 'Exit', exit)
     # Список с кнопками
     button_list = [button1, button2, button3, button4]
 
