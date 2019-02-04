@@ -1,5 +1,4 @@
 import pygame
-import menu_lvl
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -33,24 +32,19 @@ def main():
     done = False
 
     def start():
-        pass
+        import menu_lvl
+
     def exit():
         nonlocal done
         done = True
 
-    def settings():
-        pass
 
     def info():
         pass
-
-    # Кнопки, размер и расположение, название, функции, которые срабатывают по нажатию
     button1 = create_button(100, 100, 250, 80, 'Start', start)
-    button2 = create_button(100, 200, 250, 80, 'Settings', settings)
-    button3 = create_button(100, 300, 250, 80, 'Info', info)
+    button3 = create_button(100, 250, 250, 80, 'Info', info)
     button4 = create_button(100, 400, 250, 80, 'Exit', exit)
-    # Список с кнопками
-    button_list = [button1, button2, button3, button4]
+    button_list = [button1, button3, button4]
 
     while not done:
         for event in pygame.event.get():
