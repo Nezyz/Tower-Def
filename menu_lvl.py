@@ -85,7 +85,7 @@ def main():
     done = False
 
     def start():
-        import menu_lvl
+        import battle
 
     def exit():
         nonlocal done
@@ -93,7 +93,7 @@ def main():
 
 
     def info():
-        pass
+        import battle
     button1 = create_button(100, 100, 250, 80, 'Start', start)
     button3 = create_button(100, 250, 250, 80, 'Info', info)
     button4 = create_button(100, 400, 250, 80, 'Exit', exit)

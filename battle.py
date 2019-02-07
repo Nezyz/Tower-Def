@@ -11,6 +11,7 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 fire = None
 
+
 def load_images(path, colorkey=None):
     images = []
     for file_name in os.listdir(path):
@@ -39,7 +40,7 @@ def create_battleground():
 class Tower(pygame.sprite.Sprite):
     tower_def = load_images('tower_def', -1)
 
-    def __init__(self, x,y, number):
+    def __init__(self, x, y, number):
         super().__init__(all_sprites)
         self.image = Tower.tower_def[1]
         self.rect = self.image.get_rect()
@@ -49,10 +50,11 @@ class Tower(pygame.sprite.Sprite):
     def get_xy(self):
         return self.rect.topleft
 
+
 class Fire(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
 
-    def __init__(self, x,y, target):
+    def __init__(self, x, y, target):
         super().__init__(all_sprites)
         self.add(fire_sprite)
         self.image = Fire.arrow[0]
@@ -61,9 +63,8 @@ class Fire(pygame.sprite.Sprite):
         self.index = 0
         self.current_tower = 0
         self.damage = 25
-        self.vx = int(target[0]/10)
-        self.vy = int(target[1]/10)
-
+        self.vx = int(target[0] / 10)
+        self.vy = int(target[1] / 10)
 
     def update(self):
         self.rect.left += self.vx
@@ -74,21 +75,19 @@ class Fire(pygame.sprite.Sprite):
 
                 self.kill()
 
-
-
-class Bashya(pygame.sprite.Sprite):
+class Bashnya(pygame.sprite.Sprite):
     town = load_images('tower_def', -1)
 
     def __init__(self):
         super().__init__(all_sprites)
-        self.image = Bashya.town[2]
+        self.image = Bashnya.town[2]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (0, 170)
+        self.rect.topleft = (0, 225)
         self.index = 0
         self.hp = 1000
         self.mana = 100
 
-    def damage(self,damage):
+    def damage(self, damage):
         self.hp -= damage
 
     def update(self):
@@ -98,13 +97,13 @@ class Bashya(pygame.sprite.Sprite):
                 self.damage(ai.my_damage)
         if self.hp <= 0:
             self.kill()
+
             print("game over")
-
-
 
 
 class AI(pygame.sprite.Sprite):
     fire = None
+
     def __init__(self, images):
         super(AI, self).__init__()
         self.add(ai_sprites)
@@ -131,7 +130,7 @@ class AI(pygame.sprite.Sprite):
 
         self.hp_monster = 100
 
-    def damage(self,damage):
+    def damage(self, damage):
         self.hp_monster -= damage
         print(self.hp_monster)
 
@@ -167,21 +166,24 @@ class AI(pygame.sprite.Sprite):
         self.rect.move_ip(*self.velocity)
 
     def run_ai(self):
-        self.vx = -5
+        self.vx = -9
         if self.rect.left < 235:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
-        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top)/40)
+        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 40)
 
     def update(self):
         self.update_time_dependent(clock.tick(50) / 1100)
         self.run_ai()
-        if self.hp_monster <=0:
+        if self.hp_monster <= 0:
             self.kill()
+
+
+
 create_battleground()
 running = True
-count_ai = 3
+count_ai = 2
 dt = clock.tick(50) / 1100
 ai = []
 images_ai = load_images('images1', -1)
@@ -189,26 +191,27 @@ for i in range(count_ai):
     ai.append(AI(images=images_ai))
 all_sprites = pygame.sprite.Group(ai)
 fire_sprite = pygame.sprite.Group()
-tower = Tower(10,10,0)
-tower2 = Tower(10,350,1)
-town = Bashya()
+tower = Tower(75, 10, 0)
+tower2 = Tower(75, 350, 1)
+tower3 = Tower(75, 175, 0)
+town = Bashnya()
 fire = []
 while running:
-
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                x,y = tower.get_xy()
-                x_new,y_new = event.pos
-                fire.append(Fire(*tower.get_xy(),[x_new-x,y_new-y]))
+                x_new, y_new = event.pos
+                if y_new >= 0 and y_new < 175 and x_new > 250:
+                    x, y = tower.get_xy()
+                    fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                elif y_new >= 175 and y_new < 350 and x_new > 250:
+                    x, y = tower3.get_xy()
+                    fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                elif y_new >= 350 and x_new > 250:
+                    x, y = tower2.get_xy()
+                    fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
 
-
-            elif event.button == 3:
-                x,y = tower2.get_xy()
-                x_new,y_new = event.pos
-                fire.append(Fire(*tower2.get_xy(),[x_new-x,y_new-y]))
         if event.type == pygame.QUIT:
-
             running = False
 
     create_battleground()
@@ -216,3 +219,4 @@ while running:
     all_sprites.update()
     pygame.display.flip()
     clock.tick(35)
+    print(count_ai)
