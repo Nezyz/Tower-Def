@@ -2,6 +2,7 @@ import pygame
 import os
 import random
 import time
+
 size = width, height = 600, 300
 kol = 1
 screen = pygame.display.set_mode(size)
@@ -133,6 +134,8 @@ class AI(pygame.sprite.Sprite):
         if self.rect.left < 440:
             self.vx = 0
             self.hp_tower -= self.my_damage
+            print(self.hp_tower)
+
         if self.hp_tower <= 0:
             print('Game over')
             a = 0
