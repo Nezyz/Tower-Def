@@ -1,7 +1,7 @@
 import pygame
 import os
 import random
-
+import time
 size = width, height = 600, 300
 kol = 1
 screen = pygame.display.set_mode(size)
@@ -10,6 +10,7 @@ ai_sprites = pygame.sprite.Group()
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 fire = None
+pygame.display.set_caption("Tower def")
 
 
 def load_images(path, colorkey=None):
@@ -70,7 +71,7 @@ class AI(pygame.sprite.Sprite):
         self.add(ai_sprites)
 
         size = (32, 32)
-
+        self.hp_tower = 1000
         self.health = 100
         self.my_damage = 10
 
@@ -94,6 +95,7 @@ class AI(pygame.sprite.Sprite):
     def damage(self, damage):
         self.hp_monster -= damage
         print(self.hp_monster)
+        print(self.hp_tower)
 
     def get_pos(self):
         return self.rect.top, self.rect.left
@@ -127,9 +129,13 @@ class AI(pygame.sprite.Sprite):
         self.rect.move_ip(*self.velocity)
 
     def run_ai(self):
-        self.vx = -9
+        self.vx = -3
         if self.rect.left < 440:
             self.vx = 0
+            self.hp_tower -= self.my_damage
+        if self.hp_tower <= 0:
+            print('Game over')
+            time.sleep(60)
         self.rect.left = self.rect.left + self.vx
 
     def update(self):
