@@ -135,7 +135,15 @@ class AI(pygame.sprite.Sprite):
             self.hp_tower -= self.my_damage
         if self.hp_tower <= 0:
             print('Game over')
-            time.sleep(60)
+            a = 0
+            pusk = True
+            while pusk:
+                a += 10
+                print(a)
+                if a == 10000:
+                    import menu
+                if a > 100000:
+                    break
         self.rect.left = self.rect.left + self.vx
 
     def update(self):
