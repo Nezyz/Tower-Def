@@ -3,7 +3,7 @@ import os
 import random
 
 size = width, height = 600, 300
-
+kol = 1
 screen = pygame.display.set_mode(size)
 
 ai_sprites = pygame.sprite.Group()
@@ -37,20 +37,6 @@ def create_battleground():
     screen.blit(background, (0, 0))
 
 
-class Tower(pygame.sprite.Sprite):
-    tower_def = load_images('tower_def', -1)
-
-    def __init__(self, x, y, number):
-        super().__init__(all_sprites)
-        self.image = Tower.tower_def[1]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.index = 0
-
-    def get_xy(self):
-        return self.rect.topleft
-
-
 class Fire(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
 
@@ -74,31 +60,6 @@ class Fire(pygame.sprite.Sprite):
                 ai.damage(self.damage)
 
                 self.kill()
-
-class Bashnya(pygame.sprite.Sprite):
-    town = load_images('tower_def', -1)
-
-    def __init__(self):
-        super().__init__(all_sprites)
-        self.image = Bashnya.town[2]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (0, 225)
-        self.index = 0
-        self.hp = 1000
-        self.mana = 100
-
-    def damage(self, damage):
-        self.hp -= damage
-
-    def update(self):
-        print(self.hp)
-        for ai in ai_sprites:
-            if pygame.sprite.collide_rect(self, ai):
-                self.damage(ai.my_damage)
-        if self.hp <= 0:
-            self.kill()
-
-            print("game over")
 
 
 class AI(pygame.sprite.Sprite):
@@ -167,11 +128,9 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -9
-        if self.rect.left < 235:
+        if self.rect.left < 440:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
-
-        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 40)
 
     def update(self):
         self.update_time_dependent(clock.tick(50) / 1100)
@@ -180,36 +139,54 @@ class AI(pygame.sprite.Sprite):
             self.kill()
 
 
-
 create_battleground()
 running = True
-count_ai = 2
+
 dt = clock.tick(50) / 1100
+pp = 0
 ai = []
-images_ai = load_images('images1', -1)
-for i in range(count_ai):
-    ai.append(AI(images=images_ai))
-all_sprites = pygame.sprite.Group(ai)
-fire_sprite = pygame.sprite.Group()
-tower = Tower(75, 10, 0)
-tower2 = Tower(75, 350, 1)
-tower3 = Tower(75, 175, 0)
-town = Bashnya()
-fire = []
+victory = 0
+count_ai = 1
 while running:
+    kol = kol + 1
+    fire_sprite = pygame.sprite.Group()
+    fire = []
+    if victory > 0:
+        print("Victory!!!!!!!!!!!!!")
+    elif kol == 750:
+        if pp == 7:
+            victory = 1
+    elif kol == 30 or kol == 120 or kol == 220 or kol == 320 or kol == 400 or kol == 500 or kol == 600:
+        if pp == 1:
+            count_ai = 1
+        elif pp == 2:
+            count_ai = 2
+        elif pp == 3:
+            count_ai = 2
+        elif pp == 4:
+            count_ai = 1
+        elif pp == 5:
+            count_ai = 2
+        elif pp == 6:
+            count_ai = 2
+        images_ai = load_images('images1', -1)
+        for i in range(count_ai):
+            ai.append(AI(images=images_ai))
+        all_sprites = pygame.sprite.Group(ai)
+        pp = pp + 1
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 175 and x_new > 250:
-                    x, y = tower.get_xy()
-                    fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
-                elif y_new >= 175 and y_new < 350 and x_new > 250:
-                    x, y = tower3.get_xy()
-                    fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
-                elif y_new >= 350 and x_new > 250:
-                    x, y = tower2.get_xy()
-                    fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                if y_new >= 0 and y_new < 120 and x_new > 438:
+                    x, y = 170, 31
+                    fire.append(Fire(170, 31, [x_new - x, y_new - y]))
+                elif y_new >= 120 and y_new < 230 and x_new > 438:
+                    x, y = 270, 157
+                    fire.append(Fire(270, 157, [x_new - x, y_new - y]))
+                elif y_new >= 230 and x_new > 438:
+                    x, y = 170, 292
+                    fire.append(Fire(170, 292, [x_new - x, y_new - y]))
 
         if event.type == pygame.QUIT:
             running = False
@@ -218,5 +195,4 @@ while running:
     all_sprites.draw(screen)
     all_sprites.update()
     pygame.display.flip()
-    clock.tick(35)
-    print(count_ai)
+    clock.tick(250)
