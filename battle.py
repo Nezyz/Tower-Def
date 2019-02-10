@@ -143,7 +143,8 @@ class AI(pygame.sprite.Sprite):
             while pusk:
                 a += 10
                 print(a)
-                if a == 10000:
+                #time.sleep(1)
+                if a == 10000000:
                     import menu
                 if a > 100000:
                     break
