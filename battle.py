@@ -143,7 +143,7 @@ class AI(pygame.sprite.Sprite):
             while pusk:
                 a += 10
                 print(a)
-                #time.sleep(1)
+                # time.sleep(1)
                 if a == 10000000:
                     import menu
                 if a > 100000:
@@ -176,17 +176,17 @@ while running:
             victory = 1
     elif kol == 30 or kol == 120 or kol == 220 or kol == 320 or kol == 400 or kol == 500 or kol == 600:
         if pp == 1:
-            count_ai = 1
+            count_ai = 6
         elif pp == 2:
-            count_ai = 2
+            count_ai = 4
         elif pp == 3:
-            count_ai = 2
+            count_ai = 4
         elif pp == 4:
-            count_ai = 1
+            count_ai = 5
         elif pp == 5:
-            count_ai = 2
+            count_ai = 7
         elif pp == 6:
-            count_ai = 2
+            count_ai = 6
         images_ai = load_images('images1', -1)
         for i in range(count_ai):
             ai.append(AI(images=images_ai))

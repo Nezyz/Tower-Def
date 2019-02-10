@@ -40,7 +40,7 @@ def main():
 
 
     def info():
-        pass
+        import info_about_game
     button1 = create_button(100, 100, 250, 80, 'Start', start)
     button3 = create_button(100, 250, 250, 80, 'Info', info)
     button4 = create_button(100, 400, 250, 80, 'Exit', exit)
