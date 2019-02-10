@@ -208,7 +208,8 @@ while running:
 
         if event.type == pygame.QUIT:
             running = False
-
+            pygame.quit()
+            
     create_battleground()
     all_sprites.draw(screen)
     all_sprites.update()

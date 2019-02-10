@@ -1,4 +1,3 @@
-
 import pygame
 
 pygame.init()
@@ -13,9 +12,12 @@ red = [92, 0, 6]
 green = [0, 255, 0]
 blue = [0, 0, 255]
 
+
 def draw_button(button, screen):
     pygame.draw.rect(screen, button['color'], button['rect'])
     screen.blit(button['text'], button['text rect'])
+
+
 def create_button(x, y, w, h, text, callback):
     text_surf = FONT.render(text, True, WHITE)
     button_rect = pygame.Rect(x, y, w, h)
@@ -28,10 +30,12 @@ def create_button(x, y, w, h, text, callback):
         'callback': callback,
     }
     return button
+
+
 size = [400, 500]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption("Крутая игра")
+pygame.display.set_caption("About")
 
 done = False
 clock = pygame.time.Clock()

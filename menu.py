@@ -32,8 +32,7 @@ def main():
     done = False
 
     def start():
-        import menu_lvl
-
+        import battle
     def exit():
         nonlocal done
         done = True
