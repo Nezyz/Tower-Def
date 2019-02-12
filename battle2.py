@@ -1,11 +1,11 @@
 import pygame
 import os
 import random
-
 size = width, height = 600, 300
 
 screen = pygame.display.set_mode(size)
-
+#FONT = pygame.font.SysFont('arial', 50)
+black = [2, 2, 2]
 ai_sprites = pygame.sprite.Group()
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
@@ -87,7 +87,7 @@ class Bashnya(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = Bashnya.town[2]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (100, 225)
+        self.rect.topleft = (300, 171)
         self.index = 0
         self.hp = 1000
         self.mana = 100
@@ -102,8 +102,6 @@ class Bashnya(pygame.sprite.Sprite):
             if pygame.sprite.collide_rect(self, ai):
                 self.damage(ai.my_damage)
         if self.hp <= 0:
-            self.kill()
-            gameover = True
 
             print("game over")
 
@@ -173,7 +171,7 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -5
-        if self.rect.left < 120:
+        if self.rect.left < 405:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -191,59 +189,63 @@ class AI(pygame.sprite.Sprite):
 create_battleground()
 running = True
 count_ai = 3
-dt = clock.tick(50) / 1100
+dt = clock.tick(50) /100000000
 images_ai = load_images('images1', -1)
 for i in range(count_ai):
     a_current = AI(images=images_ai)
     print(a_current)
     ai.append(a_current)
-tower = Tower(75, 10, 0)
-tower2 = Tower(75, 350, 1)
-tower3 = Tower(75, 175, 0)
+tower = Tower(75, 0, 0)
+tower2 = Tower(75, 265, 1)
+tower3 = Tower(145, 135, 0)
 town = Bashnya()
 fire = []
 time = 0
 while running:
-    time += 1
+    time += 5
     print(time)
+    #FONT = pygame.font.SysFont('arial', 50)
+    #text = FONT.render(town.score, True, black)
+    #screen.blit(text, [175, 480])
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 175 and x_new > 250:
+                if y_new >= 0 and y_new < 135 and x_new > 250:
                     x, y = tower.get_xy()
                     fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
-                elif y_new >= 175 and y_new < 350 and x_new > 250:
+                elif y_new >= 135 and y_new < 265 and x_new > 250:
                     x, y = tower3.get_xy()
                     fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
-                elif y_new >= 350 and x_new > 250:
+                elif y_new >= 265 and x_new > 250:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
 
         if event.type == pygame.QUIT:
             running = False
+            pygame.quit()
     if len(ai_sprites) < 3 and time > 100:
         time = 0
-        new_ai = random.randint(0, 3)
+        new_ai = random.randint(2, 6)
         for j in range(new_ai):
             ai.append(AI(images=images_ai))
     create_battleground()
     all_sprites.draw(screen)
     all_sprites.update()
     pygame.display.flip()
-    clock.tick(35)
+    clock.tick(60)
     if town.hp <= 0:
         fon_img = load_images('gameover', -1)
         fon = pygame.transform.scale(fon_img[0], (width, height))
         screen.fill(pygame.Color(0, 0, 0))
         screen.blit(fon, (0, 0))
-        # font = pygame.font.SysFont('arial', 30)
-        # text_coord = 50
-        # string_rendered = font.render("Score")
-        # intro_rect = string_rendered.get_rect()
-        # intro_rect.top = text_coord
-        #  intro_rect.x = 10
-        #   screen.blit(string_rendered, intro_rect)
+        #font = pygame.font.Font(None, 30)
+        #text_coord = 50
+        #string_rendered = font.render("Score")
+        #intro_rect = string_rendered.get_rect()
+        #intro_rect.top = text_coord
+        #intro_rect.x = 10
+        #screen.blit(string_rendered, intro_rect)
         running = False
 print(count_ai)
 
@@ -252,7 +254,9 @@ while running2:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running2 = False
+            pygame.quit()
         elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             running2 = False
+            pygame.quit()
     pygame.display.flip()
 pygame.quit()
