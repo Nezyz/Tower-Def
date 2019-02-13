@@ -2,8 +2,8 @@ import pygame
 pygame.init()
 
 WHITE = (255, 255, 255)
-ACTIVE_COLOR = pygame.Color('dodgerblue1')
-INACTIVE_COLOR = pygame.Color('dodgerblue4')
+ACTIVE_COLOR = pygame.Color(215, 215, 215, 0)
+INACTIVE_COLOR = pygame.Color(27,31,28,0)
 FONT = pygame.font.SysFont('arial', 50)
 pygame.display.set_caption("Tower def")
 done = False
