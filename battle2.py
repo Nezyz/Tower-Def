@@ -15,7 +15,11 @@ fire = None
 experience = 0
 hp_p = 1000
 ai = []
-
+regulPlaysound = pygame.mixer.init()
+pygame.mixer.music.load("1.wav")
+pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+regulPlaysound = True
+volume = 1
 
 def load_images(path, colorkey=None):
     images = []
@@ -219,12 +223,25 @@ while running:
                 if y_new >= 0 and y_new < 135 and x_new > 250:
                     x, y = tower.get_xy()
                     fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                    regulPlaysound = pygame.mixer.init()
+                    pygame.mixer.music.load("vstrl2.mp3")
+                    pygame.mixer.music.play()
+                    regulPlaysound = True
+                    volume = 1
                 elif y_new >= 135 and y_new < 265 and x_new > 250:
                     x, y = tower3.get_xy()
                     fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                    regulPlaysound = pygame.mixer.init()
+                    pygame.mixer.music.load("vstrl2.mp3")
+                    pygame.mixer.music.play()
+                    regulPlaysound = True
                 elif y_new >= 265 and x_new > 250:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                    regulPlaysound = pygame.mixer.init()
+                    pygame.mixer.music.load("vstrl2.mp3")
+                    pygame.mixer.music.play()
+                    regulPlaysound = True
 
         if event.type == pygame.QUIT:
             running = False
