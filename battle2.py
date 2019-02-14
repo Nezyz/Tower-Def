@@ -2,7 +2,7 @@ import pygame
 import os
 import random
 size = width, height = 600, 300
-
+pygame.font.init()
 screen = pygame.display.set_mode(size)
 #FONT = pygame.font.SysFont('arial', 50)
 black = [2, 2, 2]
@@ -12,7 +12,8 @@ all_sprites = pygame.sprite.Group()
 ai_sprites = pygame.sprite.Group()
 fire_sprite = pygame.sprite.Group()
 fire = None
-
+experience = 0
+hp_p = 1000
 ai = []
 
 
@@ -39,6 +40,8 @@ def create_battleground():
     screen = pygame.display.set_mode(background_size)
     width, height = background_size
     screen.blit(background, (0, 0))
+
+
 
 
 class Tower(pygame.sprite.Sprite):
@@ -98,6 +101,7 @@ class Bashnya(pygame.sprite.Sprite):
 
     def update(self):
         print(self.hp)
+        hp_p = self.hp
         for ai in ai_sprites:
             if pygame.sprite.collide_rect(self, ai):
                 self.damage(ai.my_damage)
@@ -116,6 +120,7 @@ class AI(pygame.sprite.Sprite):
 
         self.health = 100
         self.my_damage = 10
+        self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
         self.images = images
@@ -226,6 +231,7 @@ while running:
             pygame.quit()
     if len(ai_sprites) < 3 and time > 100:
         time = 0
+        experience += 100
         new_ai = random.randint(2, 6)
         for j in range(new_ai):
             ai.append(AI(images=images_ai))
@@ -239,13 +245,11 @@ while running:
         fon = pygame.transform.scale(fon_img[0], (width, height))
         screen.fill(pygame.Color(0, 0, 0))
         screen.blit(fon, (0, 0))
-        #font = pygame.font.Font(None, 30)
-        #text_coord = 50
-        #string_rendered = font.render("Score")
-        #intro_rect = string_rendered.get_rect()
-        #intro_rect.top = text_coord
-        #intro_rect.x = 10
-        #screen.blit(string_rendered, intro_rect)
+        myfont = pygame.font.SysFont("monospace", 15)
+        label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+        screen.blit(label, (20, 20))
+        label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+        screen.blit(label_2, (20, 40))
         running = False
 print(count_ai)
 
