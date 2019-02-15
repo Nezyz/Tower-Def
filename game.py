@@ -1,15 +1,16 @@
 import pygame
 import os
 import random
+
 pygame.init()
 
 WHITE = (255, 255, 255)
 ACTIVE_COLOR = pygame.Color(215, 215, 215, 0)
-INACTIVE_COLOR = pygame.Color(27,31,28,0)
+INACTIVE_COLOR = pygame.Color(27, 31, 28, 0)
 FONT = pygame.font.SysFont('arial', 50)
 pygame.display.set_caption("Tower def")
-done = False
 
+done = False
 
 screen = pygame.display.set_mode((450, 550))
 clock = pygame.time.Clock()
@@ -19,6 +20,7 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 ai_sprites = pygame.sprite.Group()
 fire_sprite = pygame.sprite.Group()
+
 
 def load_images(path, colorkey=None):
     images = []
@@ -43,8 +45,6 @@ def create_battleground():
     screen = pygame.display.set_mode(background_size)
     width, height = background_size
     screen.blit(background, (0, 0))
-
-
 
 
 class Tower(pygame.sprite.Sprite):
@@ -104,8 +104,7 @@ class Bashnya(pygame.sprite.Sprite):
 
     def update(self):
 
-
-        #print(self.hp)
+        # print(self.hp)
         hp_p = self.hp
         for ai in ai_sprites:
             if pygame.sprite.collide_rect(self, ai):
@@ -116,19 +115,22 @@ class Bashnya(pygame.sprite.Sprite):
 
             print("game over")
 
+
 class HPBar(pygame.sprite.Sprite):
     def __init__(self, t):
         super().__init__(all_sprites)
-        self.image = pygame.Surface((819,10))
+        self.image = pygame.Surface((819, 10))
         self.image.fill(pygame.Color("red"))
-        self.rect = ((0,0), (819,10))
+        self.rect = ((0, 0), (819, 10))
         self.town = t
+
     def update(self, *args):
-        value =  int((819) * (self.town.hp / 1000))
-        if value >0:
-            self.image = pygame.Surface((value,10))
+        value = int((819) * (self.town.hp / 1000))
+        if value > 0:
+            self.image = pygame.Surface((value, 10))
             self.image.fill(pygame.Color("red"))
-            self.rect = (0, 0,value, 10)
+            self.rect = (0, 0, value, 10)
+
 
 class AI(pygame.sprite.Sprite):
     fire = None
@@ -161,7 +163,7 @@ class AI(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp_monster -= damage
-        #print(self.hp_monster)
+        # print(self.hp_monster)
 
     def get_pos(self):
         return self.rect.top, self.rect.left
@@ -211,7 +213,166 @@ class AI(pygame.sprite.Sprite):
             self.kill()
 
 
+class Death(pygame.sprite.Sprite):
+    fire = None
 
+    def __init__(self, images):
+        super().__init__(all_sprites)
+        self.add(ai_sprites)
+        size = (32, 32)
+
+        self.health = 100
+        self.my_damage = 5
+        self.experience = 0
+
+        self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
+        self.images = images
+        self.images_right = images
+        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
+        self.index = 0
+        self.image = images[self.index]
+
+        self.velocity = pygame.math.Vector2(0, 0)
+
+        self.animation_time = 0.4
+        self.current_time = 0
+
+        self.animation_frames = 6
+        self.current_frame = 0
+
+        self.hp_monster = 200
+
+    def damage(self, damage):
+        self.hp_monster -= damage
+        # print(self.hp_monster)
+
+    def get_pos(self):
+        return self.rect.top, self.rect.left
+
+    def update_time_dependent(self, dt):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_time += dt
+        if self.current_time >= self.animation_time:
+            self.current_time = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def update_frame_dependent(self):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_frame += 1
+        if self.current_frame >= self.animation_frames:
+            self.current_frame = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def run_ai(self):
+        self.vx = -7
+        if self.rect.left < 405:
+            self.vx = 0
+        self.rect.left = self.rect.left + self.vx
+
+        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
+
+    def update(self):
+        self.update_time_dependent(clock.tick(50) / 1100)
+        self.run_ai()
+        if self.hp_monster <= 0:
+            town.score += 2
+            all_sprites.remove(self)
+            self.kill()
+
+
+class Shaman(pygame.sprite.Sprite):
+    fire = None
+
+    def __init__(self, images):
+        super().__init__(all_sprites)
+        self.add(ai_sprites)
+        size = (32, 32)
+
+        self.health = 100
+        self.my_damage = 5
+        self.experience = 0
+
+        self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
+        self.images = images
+        self.images_right = images
+        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
+        self.index = 0
+        self.image = images[self.index]
+
+        self.velocity = pygame.math.Vector2(0, 0)
+
+        self.animation_time = 1
+        self.current_time = 0
+
+        self.animation_frames = 6
+        self.current_frame = 0
+
+        self.hp_monster = 150
+
+    def damage(self, damage):
+        self.hp_monster -= (damage + 5)
+        # print(self.hp_monster)
+
+    def get_pos(self):
+        return self.rect.top, self.rect.left
+
+    def update_time_dependent(self, dt):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_time += dt
+        if self.current_time >= self.animation_time:
+            self.current_time = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def update_frame_dependent(self):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_frame += 1
+        if self.current_frame >= self.animation_frames:
+            self.current_frame = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def run_ai(self):
+        self.vx = -6
+        if self.rect.left < 405:
+            self.vx = 0
+        self.rect.left = self.rect.left + self.vx
+
+        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
+
+    def update(self):
+        self.update_time_dependent(clock.tick(50) / 1100)
+        self.run_ai()
+        if self.hp_monster <= 0:
+            town.score += 1
+            all_sprites.remove(self)
+            self.kill()
 
 
 def draw_button(button, screen):
@@ -233,10 +394,10 @@ def create_button(x, y, w, h, text, callback):
     return button
 
 
-
 def start():
     done = True
     return True
+
 
 def exit():
     done = True
@@ -245,6 +406,8 @@ def exit():
 
 def info():
     import info_about_game
+
+
 button1 = create_button(100, 100, 250, 80, 'Start', start)
 button3 = create_button(100, 250, 250, 80, 'Info', info)
 button4 = create_button(100, 400, 250, 80, 'Exit', exit)
@@ -272,7 +435,6 @@ while not done:
     pygame.display.update()
     clock.tick(30)
 
-
 pygame.quit()
 
 size = width, height = 600, 300
@@ -281,10 +443,13 @@ screen = pygame.display.set_mode(size)
 # FONT = pygame.font.SysFont('arial', 50)
 black = [2, 2, 2]
 
+pygame.display.set_caption("Tower def")
 fire = None
 experience = 0
 hp_p = 1000
 ai = []
+ai_death = []
+ai_shaman = []
 regulPlaysound = pygame.mixer.init()
 pygame.mixer.music.load("1.wav")
 pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
@@ -293,12 +458,24 @@ volume = 1
 create_battleground()
 running = True
 count_ai = 3
+count_ai_death = 2
+count_ai_shaman = 2
 dt = clock.tick(50) / 100000000
 images_ai = load_images('images1', -1)
+images_ai_death = load_images('death', -1)
+images_ai_shaman = load_images('shaman', -1)
 for i in range(count_ai):
     a_current = AI(images=images_ai)
-    #print(a_current)
     ai.append(a_current)
+for i in range(count_ai_death):
+    death_current = Death(images=images_ai_death)
+    # ai_death.append(AI(images=images_ai_death))
+    ai_death.append(death_current)
+for i in range(count_ai_death):
+    shaman_current = Shaman(images=images_ai_shaman)
+    # ai_death.append(AI(images=images_ai_death))
+    ai_shaman.append(shaman_current)
+
 tower = Tower(75, 0, 0)
 tower2 = Tower(75, 265, 1)
 tower3 = Tower(145, 135, 0)
@@ -306,9 +483,11 @@ town = Bashnya()
 hpbar = HPBar(town)
 fire = []
 time = 0
+time_2 = 0
 while running:
     time += 5
-    #rint(time)
+    time_2 += 10
+    # print(time)
     # FONT = pygame.font.SysFont('arial', 50)
     # text = FONT.render(town.score, True, black)
     # screen.blit(text, [175, 480])
@@ -341,12 +520,27 @@ while running:
                     pygame.mixer.music.play()
                     regulPlaysound = True
 
-    if len(ai_sprites) < 3 and time > 100:
+    if len(ai_sprites) < 4 and time > 55 and time_2 > 70:
         time = 0
+        time_2 = 0
         experience += 100
-        new_ai = random.randint(2, 6)
+        new_ai = random.randint(1, 5)
         for j in range(new_ai):
             ai.append(AI(images=images_ai))
+    if len(ai_sprites) < 2 and time > 35 and time_2 > 20:
+        time = 0
+        time_2 = 0
+        experience += 100
+        new_shaman = random.randint(1, 3)
+        for a in range(new_shaman):
+            ai_shaman.append(Shaman(images=images_ai_shaman))
+    if len(ai_sprites) < 3 and time > 40 and time_2 > 53:
+        time = 0
+        time_2 = 0
+        experience += 100
+        new_death = random.randint(1, 2)
+        for g in range(new_death):
+            ai_death.append(Death(images=images_ai_death))
     create_battleground()
     all_sprites.draw(screen)
     all_sprites.update()
