@@ -93,7 +93,7 @@ class Bashnya(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = Bashnya.town[2]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (300, 171)
+        self.rect.topleft = (320, 171)
         self.index = 0
         self.hp = 1000
         self.mana = 100
@@ -163,6 +163,7 @@ class AI(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp_monster -= damage
+
         # print(self.hp_monster)
 
     def get_pos(self):
@@ -198,7 +199,7 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -5
-        if self.rect.left < 405:
+        if self.rect.left < 425:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -279,7 +280,7 @@ class Death(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -7
-        if self.rect.left < 405:
+        if self.rect.left < 425:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -360,7 +361,7 @@ class Shaman(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -6
-        if self.rect.left < 405:
+        if self.rect.left < 425:
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
