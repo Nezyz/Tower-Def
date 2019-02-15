@@ -60,6 +60,10 @@ class Tower(pygame.sprite.Sprite):
     def get_xy(self):
         return self.rect.topleft
 
+    def update(self):
+        self.hp = town.hp
+        if self.hp <= 475:
+            self.kill()
 
 class Fire(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
@@ -82,7 +86,6 @@ class Fire(pygame.sprite.Sprite):
         for ai in ai_sprites:
             if pygame.sprite.collide_rect(self, ai):
                 ai.damage(self.damage)
-
                 self.kill()
 
 
@@ -101,6 +104,9 @@ class Bashnya(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp -= damage
+        #self.hp -= AI.my_damage
+        #self.hp -= Shaman.my_damage
+        #self.hp -= Death.my_damage
 
     def update(self):
 
@@ -109,11 +115,10 @@ class Bashnya(pygame.sprite.Sprite):
         for ai in ai_sprites:
             if pygame.sprite.collide_rect(self, ai):
                 self.damage(ai.my_damage)
-        if self.hp <= 0:
+
+        if self.hp <= 750:
             all_sprites.remove(self)
             self.kill()
-
-            print("game over")
 
 
 class HPBar(pygame.sprite.Sprite):
@@ -140,7 +145,6 @@ class AI(pygame.sprite.Sprite):
         self.add(ai_sprites)
         size = (32, 32)
 
-        self.health = 100
         self.my_damage = 5
         self.experience = 0
 
@@ -199,7 +203,19 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -5
-        if self.rect.left < 425:
+        #if self.rect.left == 425 and  self.hp > 750:
+            #self.vx = 0
+        if self.rect.left != 425 and town.hp >= 750:
+            self.vx = -5
+        elif self.rect.left < 425 and town.hp >= 750:
+            self.vx = 0
+        elif self.rect.left <= 300 and town.hp >= 475:
+            town.hp -= self.my_damage
+            self.vx = 0
+        elif self.rect.left != 300 and town.hp >= 475:
+            self.vx = -5
+        elif self.rect.left <= 150:
+            town.hp -= self.my_damage
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -222,7 +238,6 @@ class Death(pygame.sprite.Sprite):
         self.add(ai_sprites)
         size = (32, 32)
 
-        self.health = 100
         self.my_damage = 5
         self.experience = 0
 
@@ -280,8 +295,21 @@ class Death(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -7
-        if self.rect.left < 425:
+        #if self.rect.left == 425 and  self.hp > 750:
+            #self.vx = 0
+        if self.rect.left < 425 and town.hp >= 750:
             self.vx = 0
+        elif self.rect.left != 425 and town.hp >= 750:
+            self.vx = -7
+        elif self.rect.left <= 300 and town.hp >= 475:
+            town.hp -= self.my_damage
+            self.vx = 0
+        elif self.rect.left != 300 and town.hp >= 475:
+            self.vx = -7
+        elif self.rect.left <= 150:
+            town.hp -= self.my_damage
+            self.vx = 0
+
         self.rect.left = self.rect.left + self.vx
 
         self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
@@ -303,7 +331,6 @@ class Shaman(pygame.sprite.Sprite):
         self.add(ai_sprites)
         size = (32, 32)
 
-        self.health = 100
         self.my_damage = 5
         self.experience = 0
 
@@ -361,7 +388,19 @@ class Shaman(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -6
-        if self.rect.left < 425:
+        #if self.rect.left == 425 and  self.hp >750:
+            #self.vx = 0
+        if self.rect.left <= 425 and town.hp >= 750:
+            self.vx = 0
+        elif self.rect.left != 425 and town.hp >= 750:
+            self.vx = -6
+        elif self.rect.left <= 300 and town.hp >= 475:
+            town.hp -= self.my_damage
+            self.vx = 0
+        elif self.rect.left != 300 and town.hp >= 475:
+            self.vx = -6
+        elif self.rect.left <= 150:
+            town.hp -= self.my_damage
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
