@@ -65,8 +65,10 @@ class Tower(pygame.sprite.Sprite):
         if self.hp <= 475:
             self.kill()
 
+
 class Fire(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
+    flag_fire = True
 
     def __init__(self, x, y, target):
         super().__init__(all_sprites)
@@ -81,6 +83,10 @@ class Fire(pygame.sprite.Sprite):
         self.vy = int(target[1] / 10)
 
     def update(self):
+        self.hp = town.hp
+        if self.hp <= 250:
+            self.flag_fire = False
+            self.kill()
         self.rect.left += self.vx
         self.rect.top += self.vy
         for ai in ai_sprites:
@@ -102,19 +108,11 @@ class Bashnya(pygame.sprite.Sprite):
         self.mana = 100
         self.score = 0
 
-    def damage(self, damage):
-        self.hp -= damage
-        #self.hp -= AI.my_damage
-        #self.hp -= Shaman.my_damage
-        #self.hp -= Death.my_damage
-
     def update(self):
 
-        # print(self.hp)
-        hp_p = self.hp
-        for ai in ai_sprites:
-            if pygame.sprite.collide_rect(self, ai):
-                self.damage(ai.my_damage)
+        #for ai in ai_sprites:
+         #   if pygame.sprite.collide_rect(self, ai):
+          #      self.damage(ai.my_damage)
 
         if self.hp <= 750:
             all_sprites.remove(self)
@@ -168,8 +166,6 @@ class AI(pygame.sprite.Sprite):
     def damage(self, damage):
         self.hp_monster -= damage
 
-        # print(self.hp_monster)
-
     def get_pos(self):
         return self.rect.top, self.rect.left
 
@@ -203,16 +199,15 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -5
-        #if self.rect.left == 425 and  self.hp > 750:
-            #self.vx = 0
         if self.rect.left != 425 and town.hp >= 750:
             self.vx = -5
         elif self.rect.left < 425 and town.hp >= 750:
-            self.vx = 0
-        elif self.rect.left <= 300 and town.hp >= 475:
             town.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 475:
+        elif self.rect.left <= 300 and town.hp >= 250:
+            town.hp -= self.my_damage
+            self.vx = 0
+        elif self.rect.left != 300 and town.hp >= 250:
             self.vx = -5
         elif self.rect.left <= 150:
             town.hp -= self.my_damage
@@ -238,7 +233,7 @@ class Death(pygame.sprite.Sprite):
         self.add(ai_sprites)
         size = (32, 32)
 
-        self.my_damage = 5
+        self.my_damage = 7
         self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
@@ -260,7 +255,6 @@ class Death(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp_monster -= damage
-        # print(self.hp_monster)
 
     def get_pos(self):
         return self.rect.top, self.rect.left
@@ -295,16 +289,15 @@ class Death(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -7
-        #if self.rect.left == 425 and  self.hp > 750:
-            #self.vx = 0
         if self.rect.left < 425 and town.hp >= 750:
+            town.hp -= self.my_damage
             self.vx = 0
         elif self.rect.left != 425 and town.hp >= 750:
             self.vx = -7
-        elif self.rect.left <= 300 and town.hp >= 475:
+        elif self.rect.left <= 300 and town.hp >= 250:
             town.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 475:
+        elif self.rect.left != 300 and town.hp >= 250:
             self.vx = -7
         elif self.rect.left <= 150:
             town.hp -= self.my_damage
@@ -331,7 +324,7 @@ class Shaman(pygame.sprite.Sprite):
         self.add(ai_sprites)
         size = (32, 32)
 
-        self.my_damage = 5
+        self.my_damage = 6
         self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
@@ -353,7 +346,6 @@ class Shaman(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp_monster -= (damage + 5)
-        # print(self.hp_monster)
 
     def get_pos(self):
         return self.rect.top, self.rect.left
@@ -388,16 +380,15 @@ class Shaman(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -6
-        #if self.rect.left == 425 and  self.hp >750:
-            #self.vx = 0
         if self.rect.left <= 425 and town.hp >= 750:
+            town.hp -= self.my_damage
             self.vx = 0
         elif self.rect.left != 425 and town.hp >= 750:
             self.vx = -6
-        elif self.rect.left <= 300 and town.hp >= 475:
+        elif self.rect.left <= 300 and town.hp >= 250:
             town.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 475:
+        elif self.rect.left != 300 and town.hp >= 250:
             self.vx = -6
         elif self.rect.left <= 150:
             town.hp -= self.my_damage
@@ -480,7 +471,6 @@ pygame.quit()
 size = width, height = 600, 300
 pygame.font.init()
 screen = pygame.display.set_mode(size)
-# FONT = pygame.font.SysFont('arial', 50)
 black = [2, 2, 2]
 
 pygame.display.set_caption("Tower def")
@@ -509,11 +499,9 @@ for i in range(count_ai):
     ai.append(a_current)
 for i in range(count_ai_death):
     death_current = Death(images=images_ai_death)
-    # ai_death.append(AI(images=images_ai_death))
     ai_death.append(death_current)
 for i in range(count_ai_death):
     shaman_current = Shaman(images=images_ai_shaman)
-    # ai_death.append(AI(images=images_ai_death))
     ai_shaman.append(shaman_current)
 
 tower = Tower(75, 0, 0)
@@ -527,17 +515,13 @@ time_2 = 0
 while running:
     time += 5
     time_2 += 10
-    # print(time)
-    # FONT = pygame.font.SysFont('arial', 50)
-    # text = FONT.render(town.score, True, black)
-    # screen.blit(text, [175, 480])
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 135 and x_new > 250:
+                if y_new >= 0 and y_new < 135 and x_new > 250 and Fire.flag_fire != False:
                     x, y = tower.get_xy()
                     fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
@@ -545,14 +529,14 @@ while running:
                     pygame.mixer.music.play()
                     regulPlaysound = True
                     volume = 1
-                elif y_new >= 135 and y_new < 265 and x_new > 250:
+                elif y_new >= 135 and y_new < 265 and x_new > 250 and Fire.flag_fire != False:
                     x, y = tower3.get_xy()
                     fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
                     regulPlaysound = True
-                elif y_new >= 265 and x_new > 250:
+                elif y_new >= 265 and x_new > 250 and Fire.flag_fire != False:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
@@ -597,7 +581,6 @@ while running:
         label_2 = myfont.render(str(experience), 1, (255, 255, 0))
         screen.blit(label_2, (20, 40))
         running = False
-# print(count_ai)
 
 running2 = True
 while running2:
