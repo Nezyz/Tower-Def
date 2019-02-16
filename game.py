@@ -62,7 +62,7 @@ class Tower(pygame.sprite.Sprite):
 
     def update(self):
         self.hp = town.hp
-        if self.hp <= 475:
+        if self.hp <= 250:
             self.kill()
 
 
@@ -109,11 +109,6 @@ class Bashnya(pygame.sprite.Sprite):
         self.score = 0
 
     def update(self):
-
-        #for ai in ai_sprites:
-         #   if pygame.sprite.collide_rect(self, ai):
-          #      self.damage(ai.my_damage)
-
         if self.hp <= 750:
             all_sprites.remove(self)
             self.kill()
@@ -521,7 +516,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 135 and x_new > 250 and Fire.flag_fire != False:
+                if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
                     x, y = tower.get_xy()
                     fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
@@ -529,14 +524,14 @@ while running:
                     pygame.mixer.music.play()
                     regulPlaysound = True
                     volume = 1
-                elif y_new >= 135 and y_new < 265 and x_new > 250 and Fire.flag_fire != False:
+                elif y_new >= 135 and y_new < 265 and x_new > 250 and town.hp > 250:
                     x, y = tower3.get_xy()
                     fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
                     regulPlaysound = True
-                elif y_new >= 265 and x_new > 250 and Fire.flag_fire != False:
+                elif y_new >= 265 and x_new > 250 and town.hp > 250:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
