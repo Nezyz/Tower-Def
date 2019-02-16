@@ -1,7 +1,7 @@
 import pygame
 import os
 import random
-
+import sys
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -12,6 +12,7 @@ pygame.display.set_caption("Tower def")
 
 done = False
 
+running = True
 screen = pygame.display.set_mode((450, 550))
 clock = pygame.time.Clock()
 done = False
@@ -421,13 +422,12 @@ def create_button(x, y, w, h, text, callback):
 
 
 def start():
-    done = True
     return True
 
 
 def exit():
-    done = True
-    return True
+    pygame.quit()
+    sys.exit()
 
 
 def info():
@@ -442,7 +442,7 @@ button_list = [button1, button3, button4]
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+            exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 for button in button_list:
@@ -512,7 +512,10 @@ while running:
     time_2 += 10
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+
+            exit()
             running = False
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
@@ -581,8 +584,11 @@ running2 = True
 while running2:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+
+            exit()
             running2 = False
         elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+            exit()
             running2 = False
 
     pygame.display.flip()
