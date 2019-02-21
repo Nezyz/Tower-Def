@@ -92,22 +92,26 @@ class Tower(pygame.sprite.Sprite):
 
     def __init__(self, x, y, number):
         super().__init__(all_sprites)
+
+        self.hp = 1000
         self.image = Tower.tower_def[1]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.index = 0
 
+        self.mana = 100
     def get_xy(self):
         return self.rect.topleft
 
     def update(self):
-        self.hp = town.hp
+        self.hp = tower.hp
         if self.hp <= 250:
             self.kill()
 
 
 class Fire(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
+    a = load_images('blood', -1)
     flag_fire = True
 
     def __init__(self, x, y, target):
@@ -123,7 +127,7 @@ class Fire(pygame.sprite.Sprite):
         self.vy = int(target[1] / 10)
 
     def update(self):
-        self.hp = town.hp
+        self.hp = tower.hp
         if self.hp <= 250:
             self.flag_fire = False
             self.kill()
@@ -134,7 +138,10 @@ class Fire(pygame.sprite.Sprite):
                 ai.damage(self.damage)
                 create_particles((self.rect.left+90,self.rect.top+30))
                 self.kill()
-
+                self.image = Fire.a[0]
+                self.image = pygame.Surface((10, 10))
+                self.image.fill(pygame.Color("red"))
+                print(self.image)
 
 class Bashnya(pygame.sprite.Sprite):
     town = load_images('tower_def', -1)
@@ -145,14 +152,15 @@ class Bashnya(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (320, 171)
         self.index = 0
+        self.flag = True
         self.hp = 1000
-        self.mana = 100
         self.score = 0
 
     def update(self):
-        if self.hp <= 750:
+        if tower.hp <= 750:
             all_sprites.remove(self)
             self.kill()
+            self.flag = False
 
 
 class HPBar(pygame.sprite.Sprite):
@@ -161,16 +169,28 @@ class HPBar(pygame.sprite.Sprite):
         self.image = pygame.Surface((819, 10))
         self.image.fill(pygame.Color("red"))
         self.rect = ((0, 0), (819, 10))
-        self.town = t
+        self.tower = t
 
     def update(self, *args):
-        value = int((819) * (self.town.hp / 1000))
+        value = int((819) * (self.tower.hp / 1000))
         if value > 0:
             self.image = pygame.Surface((value, 10))
             self.image.fill(pygame.Color("red"))
             self.rect = (0, 0, value, 10)
 
-
+class ManaBar(pygame.sprite.Sprite):
+    def __init__(self, t):
+        super().__init__(all_sprites)
+        self.image = pygame.Surface((819, 380))
+        self.image.fill(pygame.Color("blue"))
+        self.rect = ((819, 380), (0, 0))
+        self.tower = t
+    def update(self, *args):
+        value = int((819) * (self.tower.mana / 1000))
+        if value > 0:
+            self.image = pygame.Surface((value, 10))
+            self.image.fill(pygame.Color("blue"))
+            self.rect = (0,423, 0, value)
 class AI(pygame.sprite.Sprite):
     fire = None
 
@@ -201,6 +221,7 @@ class AI(pygame.sprite.Sprite):
 
     def damage(self, damage):
         self.hp_monster -= damage
+
 
     def get_pos(self):
         return self.rect.top, self.rect.left
@@ -235,18 +256,18 @@ class AI(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -5
-        if self.rect.left != 425 and town.hp >= 750:
+        if self.rect.left <= 425 and tower.hp >= 750:
+            tower.hp -= self.my_damage
+            self.vx = 0
+        elif self.rect.left != 425 and tower.hp >= 750:
             self.vx = -5
-        elif self.rect.left < 425 and town.hp >= 750:
-            town.hp -= self.my_damage
+        elif self.rect.left <= 300 and tower.hp >= 250:
+            tower.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left <= 300 and town.hp >= 250:
-            town.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 250:
+        elif self.rect.left != 300 and tower.hp >= 250:
             self.vx = -5
         elif self.rect.left <= 150:
-            town.hp -= self.my_damage
+            tower.hp -= self.my_damage
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -325,18 +346,18 @@ class Death(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -7
-        if self.rect.left < 425 and town.hp >= 750:
-            town.hp -= self.my_damage
+        if self.rect.left < 425 and tower.hp >= 750:
+            tower.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 425 and town.hp >= 750:
+        elif self.rect.left != 425 and tower.hp >= 750:
             self.vx = -7
-        elif self.rect.left <= 300 and town.hp >= 250:
-            town.hp -= self.my_damage
+        elif self.rect.left <= 300 and tower.hp >= 250:
+            tower.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 250:
+        elif self.rect.left != 300 and tower.hp >= 250:
             self.vx = -7
         elif self.rect.left <= 150:
-            town.hp -= self.my_damage
+            tower.hp -= self.my_damage
             self.vx = 0
 
         self.rect.left = self.rect.left + self.vx
@@ -416,18 +437,18 @@ class Shaman(pygame.sprite.Sprite):
 
     def run_ai(self):
         self.vx = -6
-        if self.rect.left <= 425 and town.hp >= 750:
-            town.hp -= self.my_damage
+        if self.rect.left <= 425 and tower.hp >= 750:
+            tower.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 425 and town.hp >= 750:
+        elif self.rect.left != 425 and tower.hp >= 750:
             self.vx = -6
-        elif self.rect.left <= 300 and town.hp >= 250:
-            town.hp -= self.my_damage
+        elif self.rect.left <= 300 and tower.hp >= 250:
+            tower.hp -= self.my_damage
             self.vx = 0
-        elif self.rect.left != 300 and town.hp >= 250:
+        elif self.rect.left != 300 and tower.hp >= 250:
             self.vx = -6
         elif self.rect.left <= 150:
-            town.hp -= self.my_damage
+            tower.hp -= self.my_damage
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
 
@@ -543,11 +564,15 @@ tower = Tower(75, 0, 0)
 tower2 = Tower(75, 265, 1)
 tower3 = Tower(145, 135, 0)
 town = Bashnya()
-hpbar = HPBar(town)
+hpbar = HPBar(tower)
+manabar = ManaBar(tower)
 fire = []
 time = 0
 time_2 = 0
 while running:
+    print(tower.mana)
+    if tower.mana < 100:
+        tower.mana += 0.1
     time += 5
     time_2 += 10
     for event in pygame.event.get():
@@ -555,6 +580,13 @@ while running:
 
             exit()
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp>=250:
+                tower.mana -= 10
+                tower.hp += 100
+                print(tower.hp)
+                print(tower.mana)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -567,21 +599,22 @@ while running:
                     pygame.mixer.music.play()
                     regulPlaysound = True
                     volume = 1
-                elif y_new >= 135 and y_new < 265 and x_new > 250 and town.hp > 250:
+                elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
                     x, y = tower3.get_xy()
                     fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
                     regulPlaysound = True
-                elif y_new >= 265 and x_new > 250 and town.hp > 250:
+                elif y_new >= 265 and x_new > 250 and tower.hp > 250:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
                     regulPlaysound = True
-
+    if tower.hp >= 750 and town.flag == False:
+        town = Bashnya()
     if len(ai_sprites) < 4 and time > 55 and time_2 > 70:
         time = 0
         time_2 = 0
@@ -608,7 +641,7 @@ while running:
     all_sprites.update()
     pygame.display.flip()
     clock.tick(60)
-    if town.hp <= 0:
+    if tower.hp <= 0:
         fon_img = load_images('gameover', -1)
         fon = pygame.transform.scale(fon_img[0], (width, height))
         screen.fill(pygame.Color(0, 0, 0))
