@@ -23,6 +23,9 @@ ai_sprites = pygame.sprite.Group()
 fire_sprite = pygame.sprite.Group()
 
 
+
+
+
 def load_images(path, colorkey=None):
     images = []
     for file_name in os.listdir(path):
@@ -35,6 +38,42 @@ def load_images(path, colorkey=None):
         images.append(image)
     return images
 
+
+class Particle(pygame.sprite.Sprite):
+    fire = load_images("blood",-1)
+    for scale in (3, 5, 10):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(all_sprites)
+        self.time_life = 5
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+    def draw(self):
+        if  self.time_life> 0 :
+            r = screen.blit(self.image, (self.rect.x, self.rect.y))
+
+
+
+    def update(self):
+        self.time_life -=1
+
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if  self.time_life< 0 :
+            self.kill()
+
+
+
+def create_particles(position):
+    particle_count = 10
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
 
 def create_battleground():
     global width, height
@@ -93,6 +132,7 @@ class Fire(pygame.sprite.Sprite):
         for ai in ai_sprites:
             if pygame.sprite.collide_rect(self, ai):
                 ai.damage(self.damage)
+                create_particles((self.rect.left+90,self.rect.top+30))
                 self.kill()
 
 

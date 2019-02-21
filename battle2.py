@@ -102,6 +102,8 @@ class Bashnya(pygame.sprite.Sprite):
             if pygame.sprite.collide_rect(self, ai):
                 self.damage(ai.my_damage)
         if self.hp <= 0:
+            all_sprites.remove(self)
+            self.kill()
 
             print("game over")
 
@@ -208,6 +210,8 @@ while running:
     #text = FONT.render(town.score, True, black)
     #screen.blit(text, [175, 480])
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
@@ -221,9 +225,7 @@ while running:
                     x, y = tower2.get_xy()
                     fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
 
-        if event.type == pygame.QUIT:
-            running = False
-            pygame.quit()
+
     if len(ai_sprites) < 3 and time > 100:
         time = 0
         new_ai = random.randint(2, 6)
@@ -247,16 +249,15 @@ while running:
         #intro_rect.x = 10
         #screen.blit(string_rendered, intro_rect)
         running = False
-print(count_ai)
+#print(count_ai)
 
 running2 = True
 while running2:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running2 = False
-            pygame.quit()
         elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             running2 = False
-            pygame.quit()
+
     pygame.display.flip()
 pygame.quit()
