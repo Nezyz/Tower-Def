@@ -1,5 +1,5 @@
 import pygame
-
+import sys
 pygame.init()
 WHITE = (255, 255, 255)
 ACTIVE_COLOR = pygame.Color('dodgerblue1')
@@ -31,21 +31,25 @@ def create_button(x, y, w, h, text, callback):
     }
     return button
 
-
+def exit():
+    pygame.quit()
+    sys.exit()
 size = [400, 500]
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption("About")
 
-done = False
+done = True
 clock = pygame.time.Clock()
 
-while done == False:
+while done:
     clock.tick(10)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+
+            exit()
+            done = False
 
     screen.fill(red)
     font = pygame.font.Font(None, 25)
