@@ -191,96 +191,6 @@ class ManaBar(pygame.sprite.Sprite):
             self.image = pygame.Surface((value, 10))
             self.image.fill(pygame.Color("blue"))
             self.rect = (0,423, 0, value)
-class AI(pygame.sprite.Sprite):
-    fire = None
-
-    def __init__(self, images):
-        super().__init__(all_sprites)
-        self.add(ai_sprites)
-        size = (32, 32)
-
-        self.my_damage = 5
-        self.experience = 0
-
-        self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
-        self.images = images
-        self.images_right = images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
-
-        self.velocity = pygame.math.Vector2(0, 0)
-
-        self.animation_time = 0.1
-        self.current_time = 0
-
-        self.animation_frames = 6
-        self.current_frame = 0
-
-        self.hp_monster = 100
-
-    def damage(self, damage):
-        self.hp_monster -= damage
-
-
-    def get_pos(self):
-        return self.rect.top, self.rect.left
-
-    def update_time_dependent(self, dt):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def update_frame_dependent(self):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_frame += 1
-        if self.current_frame >= self.animation_frames:
-            self.current_frame = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def run_ai(self):
-        self.vx = -5
-        if self.rect.left <= 425 and tower.hp >= 750:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 425 and tower.hp >= 750:
-            self.vx = -5
-        elif self.rect.left <= 300 and tower.hp >= 250:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 300 and tower.hp >= 250:
-            self.vx = -5
-        elif self.rect.left <= 150:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        self.rect.left = self.rect.left + self.vx
-
-        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
-
-    def update(self):
-        self.update_time_dependent(clock.tick(50) / 1100)
-        self.run_ai()
-        if self.hp_monster <= 0:
-            town.score += 1
-            all_sprites.remove(self)
-            self.kill()
-
 
 class Death(pygame.sprite.Sprite):
     fire = None
@@ -302,10 +212,10 @@ class Death(pygame.sprite.Sprite):
 
         self.velocity = pygame.math.Vector2(0, 0)
 
-        self.animation_time = 0.4
+        self.animation_time = 0.1
         self.current_time = 0
 
-        self.animation_frames = 6
+        self.animation_frames = 2
         self.current_frame = 0
 
         self.hp_monster = 200
@@ -393,10 +303,10 @@ class Shaman(pygame.sprite.Sprite):
 
         self.velocity = pygame.math.Vector2(0, 0)
 
-        self.animation_time = 1
+        self.animation_time = 0.07
         self.current_time = 0
 
-        self.animation_frames = 6
+        self.animation_frames = 2
         self.current_frame = 0
 
         self.hp_monster = 150
@@ -550,9 +460,7 @@ dt = clock.tick(50) / 100000000
 images_ai = load_images('images1', -1)
 images_ai_death = load_images('death', -1)
 images_ai_shaman = load_images('shaman', -1)
-for i in range(count_ai):
-    a_current = AI(images=images_ai)
-    ai.append(a_current)
+
 for i in range(count_ai_death):
     death_current = Death(images=images_ai_death)
     ai_death.append(death_current)
@@ -615,13 +523,7 @@ while running:
                     regulPlaysound = True
     if tower.hp >= 750 and town.flag == False:
         town = Bashnya()
-    if len(ai_sprites) < 4 and time > 55 and time_2 > 70:
-        time = 0
-        time_2 = 0
-        experience += 100
-        new_ai = random.randint(1, 5)
-        for j in range(new_ai):
-            ai.append(AI(images=images_ai))
+
     if len(ai_sprites) < 2 and time > 35 and time_2 > 20:
         time = 0
         time_2 = 0
