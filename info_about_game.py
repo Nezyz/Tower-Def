@@ -44,12 +44,15 @@ clock = pygame.time.Clock()
 
 while done:
     clock.tick(10)
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
 
             exit()
-            done = False
+            running2 = False
+        elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+            exit()
+            running2 = False
+
 
     screen.fill(red)
     font = pygame.font.Font(None, 25)
