@@ -495,10 +495,14 @@ def info():
     import info_about_game
 
 
-button1 = create_button(100, 100, 250, 80, 'Start', start)
-button3 = create_button(100, 250, 250, 80, 'Info', info)
-button4 = create_button(100, 400, 250, 80, 'Exit', exit)
-button_list = [button1, button3, button4]
+button1 = create_button(100, 20, 250, 60, '1 уровень', start)
+button2 = create_button(100, 90, 250, 60, '2 уровень', start)
+button3 = create_button(100, 160, 250, 60, '3 уровень', start)
+button4 = create_button(100, 230, 250, 60, '4 уровень', start)
+button5 = create_button(100, 300, 250, 60, '5 уровень', start)
+button6 = create_button(100, 370, 250, 60, 'О игре', info)
+button7 = create_button(100, 440, 250, 60, 'Выход', exit)
+button_list = [button1, button2, button3, button4, button5, button6, button7]
 
 while not done:
     for event in pygame.event.get():
