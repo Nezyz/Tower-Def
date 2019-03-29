@@ -10,7 +10,11 @@ ACTIVE_COLOR = pygame.Color(215, 215, 215, 0)
 INACTIVE_COLOR = pygame.Color(27, 31, 28, 0)
 FONT = pygame.font.SysFont('arial', 50)
 pygame.display.set_caption("Tower def")
-
+u1 = False
+u2 = 0
+u3 = False
+u4 = False
+u5 = False
 done = False
 
 running = True
@@ -71,9 +75,53 @@ def create_particles(position):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
-def create_battleground():
+def create_battleground1():
     global width, height
-    background = pygame.image.load('field_battle.jpg')
+    background = pygame.image.load('field1.jpg')
+
+    background_size = background.get_size()
+    width, height = background.get_size()
+    background_rect = background.get_rect()
+    screen = pygame.display.set_mode(background_size)
+    width, height = background_size
+    screen.blit(background, (0, 0))
+
+def create_battleground2():
+    global width, height
+    background = pygame.image.load('field2.jpg')
+
+    background_size = background.get_size()
+    width, height = background.get_size()
+    background_rect = background.get_rect()
+    screen = pygame.display.set_mode(background_size)
+    width, height = background_size
+    screen.blit(background, (0, 0))
+
+def create_battleground3():
+    global width, height
+    background = pygame.image.load('field3.jpg')
+
+    background_size = background.get_size()
+    width, height = background.get_size()
+    background_rect = background.get_rect()
+    screen = pygame.display.set_mode(background_size)
+    width, height = background_size
+    screen.blit(background, (0, 0))
+
+def create_battleground4():
+    global width, height
+    background = pygame.image.load('field4.jpg')
+
+    background_size = background.get_size()
+    width, height = background.get_size()
+    background_rect = background.get_rect()
+    screen = pygame.display.set_mode(background_size)
+    width, height = background_size
+    screen.blit(background, (0, 0))
+
+def create_battleground5():
+    global width, height
+    background = pygame.image.load('field5.jpg')
 
     background_size = background.get_size()
     width, height = background.get_size()
@@ -147,7 +195,7 @@ class Bashnya(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = Bashnya.town[2]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (320, 171)
+        self.rect.topleft = (320, 150)
         self.index = 0
         self.flag = True
         self.hp = 1000
@@ -482,8 +530,560 @@ def create_button(x, y, w, h, text, callback):
     return button
 
 
-def start():
-    return True
+
+
+hp_p = 1000
+ai = []
+ai_death = []
+ai_shaman = []
+ai_drago = []
+
+
+count_ai = 3
+count_ai_death = 2
+count_ai_shaman = 2
+count_ai_drago = 1
+dt = clock.tick(50) / 100000000
+images_ai = load_images('images1', -1)
+images_ai_death = load_images('death', -1)
+images_ai_shaman = load_images('shaman', -1)
+images_ai_drago = load_images('drago', -1)
+fire = None
+tower = Tower(75, 0, 0)
+tower2 = Tower(75, 265, 1)
+tower3 = Tower(145, 135, 0)
+town = Bashnya()
+hpbar = HPBar(tower)
+manabar = ManaBar(tower)
+fire = []
+
+
+def start1():
+    regulPlaysound = pygame.mixer.init()
+    pygame.mixer.music.load("1.wav")
+    pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+    regulPlaysound = True
+    volume = 1
+    create_battleground1()
+    size = width, height = 600, 300
+    pygame.font.init()
+    screen = pygame.display.set_mode(size)
+    black = [2, 2, 2]
+
+    pygame.display.set_caption("Tower def")
+    experience = 0
+    town = Bashnya()
+    time = 0
+    time_2 = 0
+    running = True
+    while running:
+        if u2 == 10:
+            print(10000)
+        if tower.mana < 100:
+            tower.mana += 0.1
+        time += 5
+        time_2 += 10
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
+                    tower.mana -= 10
+                    tower.hp += 100
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x_new, y_new = event.pos
+                    if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                        x, y = tower.get_xy()
+                        fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                        volume = 1
+                    elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower3.get_xy()
+                        fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                    elif y_new >= 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower2.get_xy()
+                        fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+        if tower.hp >= 750 and town.flag == False:
+            town = Bashnya()
+
+        if time == 1200:
+            time = 0
+            time_2 = 0
+            experience += 100
+            new_death = random.randint(1, 2)
+            for g in range(new_death):
+                ai_death.append(Death(images=images_ai_death))
+        create_battleground1()
+        all_sprites.update()
+        all_sprites.draw(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+        if tower.hp <= 0:
+            fon_img = load_images('gameover', -1)
+            fon = pygame.transform.scale(fon_img[0], (width, height))
+            screen.fill(pygame.Color(0, 0, 0))
+            screen.blit(fon, (0, 0))
+            myfont = pygame.font.SysFont("monospace", 15)
+            label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+            screen.blit(label, (20, 20))
+            label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+            screen.blit(label_2, (20, 40))
+            running = False
+
+    running2 = True
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                exit()
+                running2 = False
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                exit()
+                running2 = False
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+
+def start2():
+    regulPlaysound = pygame.mixer.init()
+    pygame.mixer.music.load("1.wav")
+    pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+    regulPlaysound = True
+    volume = 1
+    create_battleground2()
+    size = width, height = 600, 300
+    pygame.font.init()
+    screen = pygame.display.set_mode(size)
+    black = [2, 2, 2]
+    experience = 0
+    town = Bashnya()
+    time = 0
+    time_2 = 0
+    running = True
+    while running:
+        if u2 == 10:
+            print(10000)
+        if tower.mana < 100:
+            tower.mana += 0.1
+        time += 5
+        time_2 += 10
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
+                    tower.mana -= 10
+                    tower.hp += 100
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x_new, y_new = event.pos
+                    if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                        x, y = tower.get_xy()
+                        fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                        volume = 1
+                    elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower3.get_xy()
+                        fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                    elif y_new >= 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower2.get_xy()
+                        fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+        if tower.hp >= 750 and town.flag == False:
+            town = Bashnya()
+
+        if time == 600:
+            time = 0
+            time_2 = 0
+            experience += 100
+            new_death = random.randint(1, 2)
+            for g in range(new_death):
+                ai_death.append(Death(images=images_ai_death))
+        create_battleground2()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(60)
+
+        if tower.hp <= 0:
+            fon_img = load_images('gameover', -1)
+            fon = pygame.transform.scale(fon_img[0], (width, height))
+            screen.fill(pygame.Color(0, 0, 0))
+            screen.blit(fon, (0, 0))
+            myfont = pygame.font.SysFont("monospace", 15)
+            label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+            screen.blit(label, (20, 20))
+            label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+            screen.blit(label_2, (20, 40))
+            running = False
+
+    running2 = True
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                exit()
+                running2 = False
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                exit()
+                running2 = False
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+
+def start3():
+    regulPlaysound = pygame.mixer.init()
+    pygame.mixer.music.load("1.wav")
+    pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+    regulPlaysound = True
+    volume = 1
+    create_battleground3()
+    size = width, height = 600, 300
+    pygame.font.init()
+    screen = pygame.display.set_mode(size)
+    black = [2, 2, 2]
+    experience = 0
+    town = Bashnya()
+    time = 0
+    time_2 = 0
+    running = True
+    while running:
+        if u2 == 10:
+            print(10000)
+        if tower.mana < 100:
+            tower.mana += 0.1
+        time += 5
+        time_2 += 10
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
+                    tower.mana -= 10
+                    tower.hp += 100
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x_new, y_new = event.pos
+                    if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                        x, y = tower.get_xy()
+                        fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                        volume = 1
+                    elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower3.get_xy()
+                        fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                    elif y_new >= 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower2.get_xy()
+                        fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+        if tower.hp >= 750 and town.flag == False:
+            town = Bashnya()
+
+        if time == 700:
+            time = 0
+
+            experience += 100
+            new_shaman = random.randint(1, 3)
+            for a in range(new_shaman):
+                ai_shaman.append(Shaman(images=images_ai_shaman))
+
+        if time_2 == 1500:
+
+            time_2 = 0
+            experience += 100
+            new_death = random.randint(1, 2)
+            for g in range(new_death):
+                ai_death.append(Death(images=images_ai_death))
+        create_battleground3()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(60)
+
+        if tower.hp <= 0:
+            fon_img = load_images('gameover', -1)
+            fon = pygame.transform.scale(fon_img[0], (width, height))
+            screen.fill(pygame.Color(0, 0, 0))
+            screen.blit(fon, (0, 0))
+            myfont = pygame.font.SysFont("monospace", 15)
+            label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+            screen.blit(label, (20, 20))
+            label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+            screen.blit(label_2, (20, 40))
+            running = False
+
+    running2 = True
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                exit()
+                running2 = False
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                exit()
+                running2 = False
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+
+def start4():
+    regulPlaysound = pygame.mixer.init()
+    pygame.mixer.music.load("1.wav")
+    pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+    regulPlaysound = True
+    volume = 1
+    create_battleground4()
+    size = width, height = 600, 300
+    pygame.font.init()
+    screen = pygame.display.set_mode(size)
+    black = [2, 2, 2]
+    experience = 0
+    town = Bashnya()
+    time = 0
+    time_2 = 0
+    running = True
+    while running:
+        if u2 == 10:
+            print(10000)
+        if tower.mana < 100:
+            tower.mana += 0.1
+        time += 5
+        time_2 += 10
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
+                    tower.mana -= 10
+                    tower.hp += 100
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x_new, y_new = event.pos
+                    if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                        x, y = tower.get_xy()
+                        fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                        volume = 1
+                    elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower3.get_xy()
+                        fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                    elif y_new >= 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower2.get_xy()
+                        fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+        if tower.hp >= 750 and town.flag == False:
+            town = Bashnya()
+
+        if time == 500:
+            time = 0
+            experience += 100
+            new_shaman = random.randint(1, 3)
+            for a in range(new_shaman):
+                ai_shaman.append(Shaman(images=images_ai_shaman))
+        if time_2 == 1000:
+
+            time_2 = 0
+            experience += 100
+            new_death = random.randint(1, 2)
+            for g in range(new_death):
+                ai_death.append(Death(images=images_ai_death))
+        create_battleground4()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(60)
+
+        if tower.hp <= 0:
+            fon_img = load_images('gameover', -1)
+            fon = pygame.transform.scale(fon_img[0], (width, height))
+            screen.fill(pygame.Color(0, 0, 0))
+            screen.blit(fon, (0, 0))
+            myfont = pygame.font.SysFont("monospace", 15)
+            label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+            screen.blit(label, (20, 20))
+            label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+            screen.blit(label_2, (20, 40))
+            running = False
+
+    running2 = True
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                exit()
+                running2 = False
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                exit()
+                running2 = False
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+
+def start5():
+    regulPlaysound = pygame.mixer.init()
+    pygame.mixer.music.load("1.wav")
+    pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
+    regulPlaysound = True
+    volume = 1
+    create_battleground5()
+    size = width, height = 600, 300
+    pygame.font.init()
+    screen = pygame.display.set_mode(size)
+    black = [2, 2, 2]
+    experience = 0
+    town = Bashnya()
+    time = 0
+    time_2 = 0
+    running = True
+    while running:
+        if u2 == 10:
+            print(10000)
+        if tower.mana < 100:
+            tower.mana += 0.1
+        time += 5
+        time_2 += 10
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
+                    tower.mana -= 10
+                    tower.hp += 100
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x_new, y_new = event.pos
+                    if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                        x, y = tower.get_xy()
+                        fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                        volume = 1
+                    elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower3.get_xy()
+                        fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+                    elif y_new >= 265 and x_new > 250 and tower.hp > 250:
+                        x, y = tower2.get_xy()
+                        fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                        regulPlaysound = pygame.mixer.init()
+                        pygame.mixer.music.load("vstrl2.mp3")
+                        pygame.mixer.music.play()
+                        regulPlaysound = True
+        if tower.hp >= 750 and town.flag == False:
+            town = Bashnya()
+
+
+        if time == 200:
+            time = 0
+            time_2 = 0
+            experience += 100
+            new_drago = random.randint(2, 3)
+            for a in range(new_drago):
+                ai_drago.append(Drago(images=images_ai_drago))
+
+        create_battleground5()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(60)
+
+        if tower.hp <= 0:
+            fon_img = load_images('gameover', -1)
+            fon = pygame.transform.scale(fon_img[0], (width, height))
+            screen.fill(pygame.Color(0, 0, 0))
+            screen.blit(fon, (0, 0))
+            myfont = pygame.font.SysFont("monospace", 15)
+            label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
+            screen.blit(label, (20, 20))
+            label_2 = myfont.render(str(experience), 1, (255, 255, 0))
+            screen.blit(label_2, (20, 40))
+            running = False
+
+    running2 = True
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                exit()
+                running2 = False
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                exit()
+                running2 = False
+
+        pygame.display.flip()
+
+    pygame.quit()
 
 
 def exit():
@@ -495,11 +1095,11 @@ def info():
     import info_about_game
 
 
-button1 = create_button(100, 20, 250, 60, '1 уровень', start)
-button2 = create_button(100, 90, 250, 60, '2 уровень', start)
-button3 = create_button(100, 160, 250, 60, '3 уровень', start)
-button4 = create_button(100, 230, 250, 60, '4 уровень', start)
-button5 = create_button(100, 300, 250, 60, '5 уровень', start)
+button1 = create_button(100, 20, 250, 60, '1 уровень', start1)
+button2 = create_button(100, 90, 250, 60, '2 уровень', start2)
+button3 = create_button(100, 160, 250, 60, '3 уровень', start3)
+button4 = create_button(100, 230, 250, 60, '4 уровень', start4)
+button5 = create_button(100, 300, 250, 60, '5 уровень', start5)
 button6 = create_button(100, 370, 250, 60, 'О игре', info)
 button7 = create_button(100, 440, 250, 60, 'Выход', exit)
 button_list = [button1, button2, button3, button4, button5, button6, button7]
@@ -525,151 +1125,5 @@ while not done:
         draw_button(button, screen)
     pygame.display.update()
     clock.tick(30)
-
-pygame.quit()
-
-size = width, height = 600, 300
-pygame.font.init()
-screen = pygame.display.set_mode(size)
-black = [2, 2, 2]
-
-pygame.display.set_caption("Tower def")
-fire = None
-experience = 0
-hp_p = 1000
-ai = []
-ai_death = []
-ai_shaman = []
-ai_drago = []
-regulPlaysound = pygame.mixer.init()
-pygame.mixer.music.load("1.wav")
-pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
-regulPlaysound = True
-volume = 1
-create_battleground()
-running = True
-count_ai = 3
-count_ai_death = 2
-count_ai_shaman = 2
-count_ai_drago = 1
-dt = clock.tick(50) / 100000000
-images_ai = load_images('images1', -1)
-images_ai_death = load_images('death', -1)
-images_ai_shaman = load_images('shaman', -1)
-images_ai_drago = load_images('drago', -1)
-
-for i in range(count_ai_death):
-    death_current = Death(images=images_ai_death)
-    ai_death.append(death_current)
-for i in range(count_ai_shaman):
-    shaman_current = Shaman(images=images_ai_shaman)
-    ai_shaman.append(shaman_current)
-
-for i in range(count_ai_drago):
-    drago_current = Drago(images=images_ai_drago)
-    ai_drago.append(drago_current)
-
-tower = Tower(75, 0, 0)
-tower2 = Tower(75, 265, 1)
-tower3 = Tower(145, 135, 0)
-town = Bashnya()
-hpbar = HPBar(tower)
-manabar = ManaBar(tower)
-fire = []
-time = 0
-time_2 = 0
-while running:
-    if tower.mana < 100:
-        tower.mana += 0.1
-    time += 5
-    time_2 += 10
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            exit()
-            running = False
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and tower.mana >= 75 and tower.hp >= 250:
-                tower.mana -= 10
-                tower.hp += 100
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
-                    x, y = tower.get_xy()
-                    fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
-                    regulPlaysound = pygame.mixer.init()
-                    pygame.mixer.music.load("vstrl2.mp3")
-                    pygame.mixer.music.play()
-                    regulPlaysound = True
-                    volume = 1
-                elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
-                    x, y = tower3.get_xy()
-                    fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
-                    regulPlaysound = pygame.mixer.init()
-                    pygame.mixer.music.load("vstrl2.mp3")
-                    pygame.mixer.music.play()
-                    regulPlaysound = True
-                elif y_new >= 265 and x_new > 250 and tower.hp > 250:
-                    x, y = tower2.get_xy()
-                    fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
-                    regulPlaysound = pygame.mixer.init()
-                    pygame.mixer.music.load("vstrl2.mp3")
-                    pygame.mixer.music.play()
-                    regulPlaysound = True
-    if tower.hp >= 750 and town.flag == False:
-        town = Bashnya()
-
-    if len(ai_sprites) < 2 and time > 35 and time_2 > 20:
-        time = 0
-        time_2 = 0
-        experience += 100
-        new_shaman = random.randint(1, 3)
-        for a in range(new_shaman):
-            ai_shaman.append(Shaman(images=images_ai_shaman))
-    if len(ai_sprites) < 3 and time > 40 and time_2 > 53:
-        time = 0
-        time_2 = 0
-        experience += 100
-        new_drago = random.randint(1, 3)
-        for a in range(new_drago):
-            ai_drago.append(Drago(images=images_ai_drago))
-    if len(ai_sprites) < 4 and time > 55 and time_2 > 70:
-        time = 0
-        time_2 = 0
-        experience += 100
-        new_death = random.randint(1, 2)
-        for g in range(new_death):
-            ai_death.append(Death(images=images_ai_death))
-    create_battleground()
-    all_sprites.draw(screen)
-    all_sprites.update()
-    pygame.display.flip()
-    clock.tick(60)
-    if tower.hp <= 0:
-        fon_img = load_images('gameover', -1)
-        fon = pygame.transform.scale(fon_img[0], (width, height))
-        screen.fill(pygame.Color(0, 0, 0))
-        screen.blit(fon, (0, 0))
-        myfont = pygame.font.SysFont("monospace", 15)
-        label = myfont.render("EXPERIENCE:", 1, (255, 255, 0))
-        screen.blit(label, (20, 20))
-        label_2 = myfont.render(str(experience), 1, (255, 255, 0))
-        screen.blit(label_2, (20, 40))
-        running = False
-
-running2 = True
-while running2:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-
-            exit()
-            running2 = False
-        elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-            exit()
-            running2 = False
-
-    pygame.display.flip()
 
 pygame.quit()

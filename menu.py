@@ -215,7 +215,8 @@ def create_button(x, y, w, h, text, callback):
 
 
 
-def start():
+def start1():
+    u1 = True
     done = True
     return True
 
@@ -226,7 +227,7 @@ def exit():
 
 def info():
     import info_about_game
-button1 = create_button(100, 100, 250, 80, 'Start', start)
+button1 = create_button(100, 100, 250, 80, 'Start', start1)
 button3 = create_button(100, 250, 250, 80, 'Info', info)
 button4 = create_button(100, 400, 250, 80, 'Exit', exit)
 button_list = [button1, button3, button4]
