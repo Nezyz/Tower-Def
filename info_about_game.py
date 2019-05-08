@@ -1,5 +1,6 @@
 import pygame
 import sys
+
 pygame.init()
 WHITE = (255, 255, 255)
 ACTIVE_COLOR = pygame.Color('dodgerblue1')
@@ -31,9 +32,12 @@ def create_button(x, y, w, h, text, callback):
     }
     return button
 
+
 def exit():
     pygame.quit()
     sys.exit()
+
+
 size = [400, 500]
 screen = pygame.display.set_mode(size)
 
@@ -52,7 +56,6 @@ while done:
         elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             exit()
             running2 = False
-
 
     screen.fill(red)
     font = pygame.font.Font(None, 25)
