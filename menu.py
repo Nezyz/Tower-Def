@@ -1,6 +1,4 @@
 import pygame
-import os
-import random
 import sys
 
 pygame.init()
@@ -10,8 +8,6 @@ ACTIVE_COLOR = pygame.Color(215, 215, 215, 0)
 INACTIVE_COLOR = pygame.Color(27, 31, 28, 0)
 FONT = pygame.font.SysFont('arial', 50)
 pygame.display.set_caption("Tower def")
-
-done = False
 
 running = True
 screen = pygame.display.set_mode((450, 550))

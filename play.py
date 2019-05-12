@@ -10,18 +10,17 @@ ACTIVE_COLOR = pygame.Color(215, 215, 215, 0)
 INACTIVE_COLOR = pygame.Color(27, 31, 28, 0)
 FONT = pygame.font.SysFont('arial', 50)
 pygame.display.set_caption("Tower def")
-
+coords = (0, 0)
 done = False
 
 running = True
 screen = pygame.display.set_mode((450, 550))
 clock = pygame.time.Clock()
-done = False
-ai_sprites = pygame.sprite.Group()
-clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 ai_sprites = pygame.sprite.Group()
+shot_sprite = pygame.sprite.Group()
 fire_sprite = pygame.sprite.Group()
+tower_sprites = pygame.sprite.Group()
 
 a = ['field_battle.jpg', 'field1.jpg', 'field2.jpg', 'field3.jpg', 'field4.jpg', 'field5.jpg']
 b = random.choice(a)
@@ -91,7 +90,7 @@ class Tower(pygame.sprite.Sprite):
 
     def __init__(self, x, y, number):
         super().__init__(all_sprites)
-
+        super().__init__(tower_sprites)
         self.hp = 1000
         self.image = Tower.tower_def[1]
         self.rect = self.image.get_rect()
@@ -109,15 +108,16 @@ class Tower(pygame.sprite.Sprite):
             self.kill()
 
 
-class Fire(pygame.sprite.Sprite):
+
+class Shot(pygame.sprite.Sprite):
     arrow = load_images('tower_def', -1)
     a = load_images('blood', -1)
     flag_fire = True
 
     def __init__(self, x, y, target):
         super().__init__(all_sprites)
-        self.add(fire_sprite)
-        self.image = Fire.arrow[0]
+        self.add(shot_sprite)
+        self.image = Shot.arrow[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.index = 0
@@ -138,7 +138,7 @@ class Fire(pygame.sprite.Sprite):
                 ai.damage(self.damage)
                 create_particles((self.rect.left + 90, self.rect.top + 30))
                 self.kill()
-                self.image = Fire.a[0]
+                self.image = Shot.a[0]
                 self.image = pygame.Surface((10, 10))
                 self.image.fill(pygame.Color("red"))
 
@@ -161,6 +161,7 @@ class Bashnya(pygame.sprite.Sprite):
             all_sprites.remove(self)
             self.kill()
             self.flag = False
+
 
 
 class HPBar(pygame.sprite.Sprite):
@@ -466,6 +467,128 @@ class Drago(pygame.sprite.Sprite):
             self.kill()
 
 
+class Mag(pygame.sprite.Sprite):
+    fire = None
+
+    def __init__(self, images):
+        super().__init__(all_sprites)
+        self.add(ai_sprites)
+        size = (32, 32)
+        self.cd = 0
+        self.my_damage = 6
+        self.experience = 0
+
+        self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
+        self.images = images
+        self.images_right = images
+        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
+        self.index = 0
+        self.image = images[self.index]
+
+        self.velocity = pygame.math.Vector2(0, 0)
+
+        self.animation_time = 0.07
+        self.current_time = 0
+
+        self.animation_frames = 3
+        self.current_frame = 0
+
+        self.hp_monster = 600
+
+    def damage(self, damage):
+        self.hp_monster -= (damage + 5)
+
+    def get_pos(self):
+        return self.rect.top, self.rect.left
+
+    def update_time_dependent(self, dt):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_time += dt
+        if self.current_time >= self.animation_time:
+            self.current_time = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def update_frame_dependent(self):
+        if self.velocity.x > 0:
+            self.images = self.images_right
+        elif self.velocity.x < 0:
+            self.images = self.images_left
+
+        self.current_frame += 1
+        if self.current_frame >= self.animation_frames:
+            self.current_frame = 0
+            self.index = (self.index + 1) % len(self.images)
+            self.image = self.images[self.index]
+
+        self.rect.move_ip(*self.velocity)
+
+    def run_ai(self):
+        self.vx = -5
+        if self.rect.left <= 600 and tower.hp >= 750:
+            print(self.rect)
+            if self.cd == 0:
+                Fire(self.rect)
+                self.cd = 10
+
+            self.vx = 0
+        elif self.rect.left != 600 and tower.hp >= 750:
+            self.vx = -5
+        elif self.rect.left <= 475 and tower.hp >= 250:
+            if self.cd == 0:
+                Fire(self.rect)
+                self.cd = 10
+            self.vx = 0
+        elif self.rect.left != 475 and tower.hp >= 250:
+            self.vx = -5
+        elif self.rect.left <= 325:
+            if self.cd == 0:
+                Fire(self.rect)
+                self.cd = 10
+            self.vx = 0
+        self.rect.left = self.rect.left + self.vx
+        self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
+
+    def update(self):
+        self.update_time_dependent(clock.tick(50) / 1100)
+        self.run_ai()
+        if self.cd > 0:
+            self.cd -= 1
+        if self.hp_monster <= 0:
+            town.score += 1
+            all_sprites.remove(self)
+            self.kill()
+
+
+class Fire(pygame.sprite.Sprite):
+    fire = load_images('firebool', -1)
+
+    def __init__(self, coords):
+        super().__init__(all_sprites)
+        self.add(fire_sprite)
+        self.image = Fire.fire[0]
+        self.rect = self.image.get_rect()
+        self.rect[:2] = coords[:2]
+        self.damage = 50
+        self.vx = 50
+        self.vy = 0
+
+    def update(self):
+        self.rect.left -= self.vx
+        self.rect.top -= self.vy
+        for ai in tower_sprites:
+            if pygame.sprite.collide_rect(self, ai):
+                tower.hp -= self.damage
+                self.image = pygame.Surface((10, 10))
+                self.kill()
+
+
 def draw_button(button, screen):
     pygame.draw.rect(screen, button['color'], button['rect'])
     screen.blit(button['text'], button['text rect'])
@@ -542,6 +665,7 @@ ai = []
 ai_death = []
 ai_shaman = []
 ai_drago = []
+ai_mag = []
 regulPlaysound = pygame.mixer.init()
 pygame.mixer.music.load("1.wav")
 pygame.mixer.Channel(1).play(pygame.mixer.Sound(file="2.wav"))
@@ -553,15 +677,20 @@ count_ai = 3
 count_ai_death = 2
 count_ai_shaman = 2
 count_ai_drago = 1
+count_ai_mag = 1
 dt = clock.tick(50) / 100000000
 images_ai = load_images('images1', -1)
 images_ai_death = load_images('death', -1)
 images_ai_shaman = load_images('shaman', -1)
 images_ai_drago = load_images('drago', -1)
+images_ai_mag = load_images('mag', -1)
 
 for i in range(count_ai_death):
     death_current = Death(images=images_ai_death)
     ai_death.append(death_current)
+for i in range(count_ai_mag):
+    mag_current = Mag(images=images_ai_mag)
+    ai_mag.append(mag_current)
 for i in range(count_ai_shaman):
     shaman_current = Shaman(images=images_ai_shaman)
     ai_shaman.append(shaman_current)
@@ -599,7 +728,7 @@ while running:
                 x_new, y_new = event.pos
                 if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
                     x, y = tower.get_xy()
-                    fire.append(Fire(*tower.get_xy(), [x_new - x, y_new - y]))
+                    fire.append(Shot(*tower.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
@@ -607,14 +736,14 @@ while running:
                     volume = 1
                 elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
                     x, y = tower3.get_xy()
-                    fire.append(Fire(*tower3.get_xy(), [x_new - x, y_new - y]))
+                    fire.append(Shot(*tower3.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
                     regulPlaysound = True
                 elif y_new >= 265 and x_new > 250 and tower.hp > 250:
                     x, y = tower2.get_xy()
-                    fire.append(Fire(*tower2.get_xy(), [x_new - x, y_new - y]))
+                    fire.append(Shot(*tower2.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
                     pygame.mixer.music.load("vstrl2.mp3")
                     pygame.mixer.music.play()
@@ -627,8 +756,11 @@ while running:
         time_2 = 0
         experience += 100
         new_shaman = random.randint(1, 3)
+        new_mag = random.randint(1, 2)
         for a in range(new_shaman):
             ai_shaman.append(Shaman(images=images_ai_shaman))
+        for b in range(new_mag):
+            ai_mag.append(Mag(images=images_ai_mag))
     if len(ai_sprites) < 3 and time > 40 and time_2 > 53:
         time = 0
         time_2 = 0
@@ -647,7 +779,7 @@ while running:
     all_sprites.draw(screen)
     all_sprites.update()
     pygame.display.flip()
-    clock.tick(150)
+    clock.tick(10000)
     if tower.hp <= 0:
         fon_img = load_images('gameover', -1)
         fon = pygame.transform.scale(fon_img[0], (width, height))
