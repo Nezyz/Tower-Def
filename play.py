@@ -21,9 +21,24 @@ ai_sprites = pygame.sprite.Group()
 shot_sprite = pygame.sprite.Group()
 fire_sprite = pygame.sprite.Group()
 tower_sprites = pygame.sprite.Group()
+choice_field = ['field_battle.jpg', 'field1.jpg', 'field2.jpg', 'field3.jpg', 'field4.jpg', 'field5.jpg']
+field = random.choice(choice_field)
 
-a = ['field_battle.jpg', 'field1.jpg', 'field2.jpg', 'field3.jpg', 'field4.jpg', 'field5.jpg']
-b = random.choice(a)
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data/' + name)
+    try:
+        image = pygame.image.load(fullname)
+    except pygame.error as message:
+        print('Cannot load image:', name)
+        raise SystemExit(message)
+
+    if colorkey is not None:
+        if colorkey is -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    image = image.convert_alpha()
+    return image
 
 
 def load_images(path, colorkey=None):
@@ -74,9 +89,8 @@ def create_particles(position):
 
 
 def create_battleground():
-    global width, height, b
-    background = pygame.image.load(b)
-
+    global width, height, field
+    background = pygame.image.load(field)
     background_size = background.get_size()
     width, height = background.get_size()
     background_rect = background.get_rect()
@@ -90,7 +104,7 @@ class Tower(pygame.sprite.Sprite):
 
     def __init__(self, x, y, number):
         super().__init__(all_sprites)
-        super().__init__(tower_sprites)
+        tower_sprites.add(self)
         self.hp = 1000
         self.image = Tower.tower_def[1]
         self.rect = self.image.get_rect()
@@ -103,10 +117,10 @@ class Tower(pygame.sprite.Sprite):
         return self.rect.topleft
 
     def update(self):
-        self.hp = tower.hp
-        if self.hp <= 250:
+        if tower.hp <= 250:
             self.kill()
-
+            all_sprites.remove(self)
+            tower_sprites.remove(self)
 
 
 class Shot(pygame.sprite.Sprite):
@@ -148,6 +162,7 @@ class Bashnya(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__(all_sprites)
+        tower_sprites.add(self)
         self.image = Bashnya.town[2]
         self.rect = self.image.get_rect()
         self.rect.topleft = (320, 171)
@@ -159,9 +174,9 @@ class Bashnya(pygame.sprite.Sprite):
     def update(self):
         if tower.hp <= 750:
             all_sprites.remove(self)
+            tower_sprites.remove(self)
             self.kill()
             self.flag = False
-
 
 
 class HPBar(pygame.sprite.Sprite):
@@ -203,25 +218,15 @@ class Death(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.add(ai_sprites)
         size = (32, 32)
-
+        self.frames = []
+        self.cut_sheet(images, 4, 1)
+        self.cur_frame = 0
+        self.pause = 0
+        self.cd = 0
+        self.image = self.frames[self.cur_frame]
         self.my_damage = 7
         self.experience = 0
-
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
-        self.images = images
-        self.images_right = images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
-
-        self.velocity = pygame.math.Vector2(0, 0)
-
-        self.animation_time = 0.1
-        self.current_time = 0
-
-        self.animation_frames = 2
-        self.current_frame = 0
-
         self.hp_monster = 200
 
     def damage(self, damage):
@@ -230,57 +235,52 @@ class Death(pygame.sprite.Sprite):
     def get_pos(self):
         return self.rect.top, self.rect.left
 
-    def update_time_dependent(self, dt):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def update_frame_dependent(self):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_frame += 1
-        if self.current_frame >= self.animation_frames:
-            self.current_frame = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def run_ai(self):
-        self.vx = -7
-        if self.rect.left < 425 and tower.hp >= 750:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 425 and tower.hp >= 750:
-            self.vx = -7
-        elif self.rect.left <= 300 and tower.hp >= 250:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 300 and tower.hp >= 250:
-            self.vx = -7
-        elif self.rect.left <= 150:
-            tower.hp -= self.my_damage
-            self.vx = 0
+        self.vx = -1.5
 
+        if self.cd == 0:
+            if self.rect.left < 425 and tower.hp >= 750:
+                tower.hp -= self.my_damage
+                self.vx = 0
+                self.cd = 50
+            elif self.rect.left != 425 and tower.hp >= 750:
+                self.vx = -1.5
+            elif self.rect.left <= 300 and tower.hp >= 250:
+                tower.hp -= self.my_damage
+                self.vx = 0
+                self.cd = 50
+            elif self.rect.left != 300 and tower.hp >= 250:
+                self.vx = -1.5
+            elif self.rect.left <= 150:
+                tower.hp -= self.my_damage
+                self.vx = 0
+                self.cd = 50
+        else:
+            self.vx = 0
+            self.cd -= 1
         self.rect.left = self.rect.left + self.vx
 
         self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
 
     def update(self):
-        self.update_time_dependent(clock.tick(50) / 1100)
+        if self.pause == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.pause = 5
+        else:
+            self.pause -= 1
         self.run_ai()
+        if self.cd > 0:
+            self.cd -= 1
         if self.hp_monster <= 0:
             town.score += 2
             all_sprites.remove(self)
@@ -294,25 +294,16 @@ class Shaman(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.add(ai_sprites)
         size = (32, 32)
-
+        self.frames = []
+        self.cut_sheet(images, 4, 1)
+        self.cur_frame = 0
+        self.pause = 0
+        self.cd = 0
+        self.image = self.frames[self.cur_frame]
         self.my_damage = 6
         self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
-        self.images = images
-        self.images_right = images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
-
-        self.velocity = pygame.math.Vector2(0, 0)
-
-        self.animation_time = 0.07
-        self.current_time = 0
-
-        self.animation_frames = 2
-        self.current_frame = 0
-
         self.hp_monster = 150
 
     def damage(self, damage):
@@ -321,56 +312,53 @@ class Shaman(pygame.sprite.Sprite):
     def get_pos(self):
         return self.rect.top, self.rect.left
 
-    def update_time_dependent(self, dt):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def update_frame_dependent(self):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_frame += 1
-        if self.current_frame >= self.animation_frames:
-            self.current_frame = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def run_ai(self):
-        self.vx = -6
-        if self.rect.left <= 425 and tower.hp >= 750:
-            tower.hp -= self.my_damage
+
+
+        if self.cd == 0:
+            self.vx = -0.5
+            if self.rect.left <= 425 and tower.hp >= 750:
+                tower.hp -= self.my_damage
+                self.vx = 0
+                self.cd = 50
+            elif self.rect.left != 425 and tower.hp >= 750:
+                self.vx = -0.5
+            elif self.rect.left <= 300 and tower.hp >= 250:
+                tower.hp -= self.my_damage
+                self.cd = 50
+                self.vx = 0
+            elif self.rect.left != 300 and tower.hp >= 250:
+                self.vx = -0.5
+            elif self.rect.left <= 150:
+                tower.hp -= self.my_damage
+                self.cd = 50
+                self.vx = 0
+        else:
             self.vx = 0
-        elif self.rect.left != 425 and tower.hp >= 750:
-            self.vx = -6
-        elif self.rect.left <= 300 and tower.hp >= 250:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 300 and tower.hp >= 250:
-            self.vx = -6
-        elif self.rect.left <= 150:
-            tower.hp -= self.my_damage
-            self.vx = 0
+            self.cd -= 1
         self.rect.left = self.rect.left + self.vx
 
         self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
 
     def update(self):
-        self.update_time_dependent(clock.tick(50) / 1100)
+        if self.pause == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.pause = 5
+        else:
+            self.pause -= 1
         self.run_ai()
+        if self.cd > 0:
+            self.cd -= 1
         if self.hp_monster <= 0:
             town.score += 1
             all_sprites.remove(self)
@@ -384,24 +372,16 @@ class Drago(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.add(ai_sprites)
         size = (32, 32)
-
+        self.frames = []
+        self.cut_sheet(images, 4, 1)
+        self.cur_frame = 0
+        self.pause = 0
+        self.cd = 0
+        self.image = self.frames[self.cur_frame]
         self.my_damage = 6
         self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
-        self.images = images
-        self.images_right = images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
-
-        self.velocity = pygame.math.Vector2(0, 0)
-
-        self.animation_time = 0.07
-        self.current_time = 0
-
-        self.animation_frames = 3
-        self.current_frame = 0
 
         self.hp_monster = 600
 
@@ -411,56 +391,55 @@ class Drago(pygame.sprite.Sprite):
     def get_pos(self):
         return self.rect.top, self.rect.left
 
-    def update_time_dependent(self, dt):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def update_frame_dependent(self):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_frame += 1
-        if self.current_frame >= self.animation_frames:
-            self.current_frame = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def run_ai(self):
-        self.vx = -5
-        if self.rect.left <= 425 and tower.hp >= 750:
-            tower.hp -= self.my_damage
+        if self.cd == 0:
+            self.vx = -1
+            if self.rect.left <= 425 and tower.hp >= 750:
+                    tower.hp -= self.my_damage
+                    self.vx = 0
+                    self.cd = 50
+            elif self.rect.left != 425 and tower.hp >= 750:
+                self.vx = -1
+            elif self.rect.left <= 300 and tower.hp >= 250:
+                if self.cd == 0:
+                    tower.hp -= self.my_damage
+                    self.vx = 0
+                    self.cd = 50
+            elif self.rect.left != 300 and tower.hp >= 250:
+                self.vx = -1
+            elif self.rect.left <= 150:
+                tower.hp -= self.my_damage
+                self.vx = 0
+                self.cd = 50
+
+        else:
             self.vx = 0
-        elif self.rect.left != 425 and tower.hp >= 750:
-            self.vx = -5
-        elif self.rect.left <= 300 and tower.hp >= 250:
-            tower.hp -= self.my_damage
-            self.vx = 0
-        elif self.rect.left != 300 and tower.hp >= 250:
-            self.vx = -5
-        elif self.rect.left <= 150:
-            tower.hp -= self.my_damage
-            self.vx = 0
+            self.cd -= 1
         self.rect.left = self.rect.left + self.vx
 
         self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
 
     def update(self):
-        self.update_time_dependent(clock.tick(50) / 1100)
+        if self.pause == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.pause = 5
+        else:
+            self.pause -= 1
         self.run_ai()
+        if self.cd > 0:
+            self.cd -= 1
+        if self.cd > 0:
+            self.cd -= 1
         if self.hp_monster <= 0:
             town.score += 1
             all_sprites.remove(self)
@@ -473,26 +452,17 @@ class Mag(pygame.sprite.Sprite):
     def __init__(self, images):
         super().__init__(all_sprites)
         self.add(ai_sprites)
+        self.frames = []
+        self.cut_sheet(images, 4, 1)
+        self.cur_frame = 0
+        self.pause = 0
+        self.image = self.frames[self.cur_frame]
         size = (32, 32)
         self.cd = 0
         self.my_damage = 6
         self.experience = 0
 
         self.rect = pygame.Rect((width - 50, random.randint(0, height - 32)), size)
-        self.images = images
-        self.images_right = images
-        self.images_left = [pygame.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
-
-        self.velocity = pygame.math.Vector2(0, 0)
-
-        self.animation_time = 0.07
-        self.current_time = 0
-
-        self.animation_frames = 3
-        self.current_frame = 0
-
         self.hp_monster = 600
 
     def damage(self, damage):
@@ -501,62 +471,49 @@ class Mag(pygame.sprite.Sprite):
     def get_pos(self):
         return self.rect.top, self.rect.left
 
-    def update_time_dependent(self, dt):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
-
-    def update_frame_dependent(self):
-        if self.velocity.x > 0:
-            self.images = self.images_right
-        elif self.velocity.x < 0:
-            self.images = self.images_left
-
-        self.current_frame += 1
-        if self.current_frame >= self.animation_frames:
-            self.current_frame = 0
-            self.index = (self.index + 1) % len(self.images)
-            self.image = self.images[self.index]
-
-        self.rect.move_ip(*self.velocity)
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def run_ai(self):
-        self.vx = -5
+        self.vx = -2
         if self.rect.left <= 600 and tower.hp >= 750:
             print(self.rect)
             if self.cd == 0:
                 Fire(self.rect)
-                self.cd = 10
+                self.cd = 50
 
             self.vx = 0
         elif self.rect.left != 600 and tower.hp >= 750:
-            self.vx = -5
+            self.vx = -2
         elif self.rect.left <= 475 and tower.hp >= 250:
             if self.cd == 0:
                 Fire(self.rect)
-                self.cd = 10
+                self.cd = 50
             self.vx = 0
         elif self.rect.left != 475 and tower.hp >= 250:
-            self.vx = -5
+            self.vx = -2
         elif self.rect.left <= 325:
             if self.cd == 0:
                 Fire(self.rect)
-                self.cd = 10
+                self.cd = 50
             self.vx = 0
         self.rect.left = self.rect.left + self.vx
         self.rect.top = self.rect.top + int((town.rect.top - self.rect.top) / 30)
 
     def update(self):
-        self.update_time_dependent(clock.tick(50) / 1100)
+        if self.pause == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.pause = 5
+        else:
+            self.pause -= 1
+
         self.run_ai()
         if self.cd > 0:
             self.cd -= 1
@@ -572,14 +529,33 @@ class Fire(pygame.sprite.Sprite):
     def __init__(self, coords):
         super().__init__(all_sprites)
         self.add(fire_sprite)
-        self.image = Fire.fire[0]
+        self.frames = []
+        self.cut_sheet(load_image('fireball.png', -1), 5, 1)
+        self.cur_frame = 0
+        self.pause = 0
+        self.image = self.frames[self.cur_frame]
         self.rect = self.image.get_rect()
         self.rect[:2] = coords[:2]
         self.damage = 50
-        self.vx = 50
+        self.vx = 5
         self.vy = 0
 
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
     def update(self):
+        if self.pause == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.pause = 5
+        else:
+            self.pause -= 1
         self.rect.left -= self.vx
         self.rect.top -= self.vy
         for ai in tower_sprites:
@@ -678,12 +654,11 @@ count_ai_death = 2
 count_ai_shaman = 2
 count_ai_drago = 1
 count_ai_mag = 1
-dt = clock.tick(50) / 100000000
-images_ai = load_images('images1', -1)
-images_ai_death = load_images('death', -1)
-images_ai_shaman = load_images('shaman', -1)
-images_ai_drago = load_images('drago', -1)
-images_ai_mag = load_images('mag', -1)
+images_ai = load_image('trashily.png', -1)
+images_ai_death = load_image('green_gigant.png', -1)
+images_ai_shaman = load_image('mag_dark.png', -1)
+images_ai_drago = load_image('drago.png', -1)
+images_ai_mag = load_image('mag.png', -1)
 
 for i in range(count_ai_death):
     death_current = Death(images=images_ai_death)
@@ -694,7 +669,6 @@ for i in range(count_ai_mag):
 for i in range(count_ai_shaman):
     shaman_current = Shaman(images=images_ai_shaman)
     ai_shaman.append(shaman_current)
-
 for i in range(count_ai_drago):
     drago_current = Drago(images=images_ai_drago)
     ai_drago.append(drago_current)
@@ -709,10 +683,11 @@ fire = []
 time = 0
 time_2 = 0
 while running:
+    time += 5
+    print(tower.hp)
+    time_2 += 10
     if tower.mana < 100:
         tower.mana += 0.1
-    time += 5
-    time_2 += 10
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -726,7 +701,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x_new, y_new = event.pos
-                if y_new >= 0 and y_new < 135 and x_new > 250 and town.hp > 250:
+                if 0 <= y_new < 135 and x_new > 250 and town.hp > 250:
                     x, y = tower.get_xy()
                     fire.append(Shot(*tower.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
@@ -734,7 +709,7 @@ while running:
                     pygame.mixer.music.play()
                     regulPlaysound = True
                     volume = 1
-                elif y_new >= 135 and y_new < 265 and x_new > 250 and tower.hp > 250:
+                elif 135 <= y_new < 265 and x_new > 250 and tower.hp > 250:
                     x, y = tower3.get_xy()
                     fire.append(Shot(*tower3.get_xy(), [x_new - x, y_new - y]))
                     regulPlaysound = pygame.mixer.init()
@@ -778,8 +753,8 @@ while running:
     create_battleground()
     all_sprites.draw(screen)
     all_sprites.update()
-    pygame.display.flip()
-    clock.tick(10000)
+    pygame.display.update()
+    clock.tick(30)
     if tower.hp <= 0:
         fon_img = load_images('gameover', -1)
         fon = pygame.transform.scale(fon_img[0], (width, height))
@@ -796,7 +771,6 @@ running2 = True
 while running2:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-
             exit()
             running2 = False
         elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
@@ -804,5 +778,4 @@ while running2:
             running2 = False
 
     pygame.display.flip()
-
 pygame.quit()
