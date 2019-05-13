@@ -483,7 +483,6 @@ class Mag(pygame.sprite.Sprite):
     def run_ai(self):
         self.vx = -2
         if self.rect.left <= 600 and tower.hp >= 750:
-            print(self.rect)
             if self.cd == 0:
                 Fire(self.rect)
                 self.cd = 50
@@ -684,7 +683,6 @@ time = 0
 time_2 = 0
 while running:
     time += 5
-    print(tower.hp)
     time_2 += 10
     if tower.mana < 100:
         tower.mana += 0.1
